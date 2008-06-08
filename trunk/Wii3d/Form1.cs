@@ -8,6 +8,8 @@ using System.Text;
 using System.Windows.Forms;
 using WiimoteLib;
 using DotNetMatrix;
+using Emgu.CV;
+using Emgu.CV.CameraCalibration;
 
 namespace Wii3d
 {
@@ -21,9 +23,11 @@ namespace Wii3d
         Bitmap b2 = new Bitmap(256, 192, PixelFormat.Format24bppRgb);
         Graphics g2;
         float[] points2D = new float[16]; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
-                                          //*** Important: point2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
+                                          //*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
         float [] points3D = new float[12];
-        int valid3DPointNumber;
+        
+        
+        //int valid3DPointNumber; //if some points has become invisible for a long time, it can not be calculated.
         int [] pairNumber = new int[4]; //p0 in camera1 is corresponds to p0 in camera2
 
         // Extrinsic parameters of cameras
@@ -64,12 +68,91 @@ namespace Wii3d
             BeginInvoke(new UpdateWiimoteStateDelegate(UpdateWiimoteState2), args);
         }
 
-        private void CameraCalibration()
+        private void Calibration()
         {
+            //sort points2D to check left upper, left down, right upper, right down points
+            //initialized
+            int l1=points2D[0]<points2D[2]?0:1;
+            int l2 =1-l1;
+            int u1 = points2D[1]<points2D[3]?0:1;
+            int u2 = 1-u1;
+            float lsecmin = Math.Max(points2D[0],points2D[2]);
+            float usecmin = Math.Max(points2D[1],points2D[3]);
+
+            for (int i = 3; i < 4; i++ )
+            {
+                if (points2D[2 * i] < lsecmin)
+                {
+                    if (points2D[2 * l1] < points2D[2 * i])
+                    {
+                        l2 = i;
+                    }
+                    else
+                    {
+                        l2 = l1;
+                        l1 = i;
+
+                    }
+                    lsecmin = points2D[2 * l2];
+                }
+
+                if (points2D[2 * i + 1] < usecmin)
+                {
+                    if (points2D[2 * u1] < points2D[2 * i + 1])
+                    {
+                        u2 = i;
+                    }
+                    else
+                    {
+                        u2 = l1;
+                        u1 = i;
+                    }
+                    usecmin = points2D[2 * u2];
+                }
+            }
             
+            IntrinsicCameraParameters ip1 = new IntrinsicCameraParameters();
+            ExtrinsicCameraParameters ep1 = new ExtrinsicCameraParameters();
+            IntrinsicCameraParameters ip2 = new IntrinsicCameraParameters();
+            ExtrinsicCameraParameters ep2 = new ExtrinsicCameraParameters();
+      
+            Matrix<int> count = new Matrix<int>(1,1);
+            count.SetValue(4);
+            MCvSize imageSize = new MCvSize(1024, 768);
+
+            Point3D<float>[] p3 = new Point3D<float>[4];
+            Point2D<float>[] p2 = new Point2D<float>[4];
+
+            float x, y, z;
+            for (int i = 0; i < 4; i++)
+            {
+                p2[i] = new Point2D<float>(points2D[2 * i], points2D[2 * i + 1]);
+                if (l1 == i || l2 == i)
+                    x = -1;
+                else
+                    x = 1;
+                if (u1 == i || u2 == i)
+                    y = 1;
+                else
+                    y = -1;
+
+                p3[i] = new Point3D<float>(x, y, 0);
+            }
+            
+            CameraCalibration.CalibrateCamera2(p3, p2, count, imageSize, ref ip1, ref ep1, 0);
+
+            //Second camera
+            for (int i = 0; i < 4; i++)
+            {
+                p2[i] = new Point2D<float>(points2D[2 * (i + 4)], points2D[2 * (i + 4) + 1]);
+            }
+
+            CameraCalibration.CalibrateCamera2(p3, p2, count, imageSize, ref ip2, ref ep2, 0);
+            
+
         }
 
-        private void CrossProduct3( float[] t, float[] R, float [] result)
+        private void CrossProduct3(float[] t, float[] R, float[] result)
         {
             result[0] = -t[2] * R[3] + t[1] * R[6];
             result[1] = -t[2] * R[4] + t[1] * R[7];
@@ -198,6 +281,8 @@ namespace Wii3d
                 lblCam1IR1Raw.Text = ws.IRState.RawX1.ToString() + ", " + ws.IRState.RawY1.ToString();
                 lblCam1IR1.BackColor = Color.Blue;
                 lblCam1IR1Raw.BackColor = Color.Blue;
+                points2D[0] = ws.IRState.RawX1;
+                points2D[1] = ws.IRState.RawY1;
             }
             else
             {
@@ -212,6 +297,8 @@ namespace Wii3d
                 lblCam1IR2Raw.Text = ws.IRState.RawX2.ToString() + ", " + ws.IRState.RawY2.ToString();
                 lblCam1IR2.BackColor = Color.Blue;
                 lblCam1IR2Raw.BackColor = Color.Blue;
+                points2D[2] = ws.IRState.RawX2;
+                points2D[3] = ws.IRState.RawY2;
             }
             else
             {
@@ -226,6 +313,8 @@ namespace Wii3d
                 lblCam1IR3Raw.Text = ws.IRState.RawX3.ToString() + ", " + ws.IRState.RawY3.ToString();
                 lblCam1IR3.BackColor = Color.Blue;
                 lblCam1IR3Raw.BackColor = Color.Blue;
+                points2D[4] = ws.IRState.RawX3;
+                points2D[5] = ws.IRState.RawY3;
             }
             else
             {
@@ -240,6 +329,8 @@ namespace Wii3d
                 lblCam1IR4Raw.Text = ws.IRState.RawX4.ToString() + ", " + ws.IRState.RawY4.ToString();
                 lblCam1IR4.BackColor = Color.Blue;
                 lblCam1IR4Raw.BackColor = Color.Blue;
+                points2D[6] = ws.IRState.RawX4;
+                points2D[7] = ws.IRState.RawY4;
             }
             else
             {
@@ -273,6 +364,8 @@ namespace Wii3d
                 lblCam2IR1Raw.Text = ws.IRState.RawX1.ToString() + ", " + ws.IRState.RawY1.ToString();
                 lblCam2IR1.BackColor = Color.Blue;
                 lblCam2IR1Raw.BackColor = Color.Blue;
+                points2D[8] = ws.IRState.RawX1;
+                points2D[9] = ws.IRState.RawY1;
             }
             else
             {
@@ -280,6 +373,7 @@ namespace Wii3d
                 lblCam2IR1Raw.Text = "NA";
                 lblCam2IR1.BackColor = Color.Empty;
                 lblCam2IR1Raw.BackColor = Color.Empty;
+
             }
             if (ws.IRState.Found2)
             {
@@ -287,6 +381,8 @@ namespace Wii3d
                 lblCam2IR2Raw.Text = ws.IRState.RawX2.ToString() + ", " + ws.IRState.RawY2.ToString();
                 lblCam2IR2.BackColor = Color.Blue;
                 lblCam2IR2Raw.BackColor = Color.Blue;
+                points2D[10] = ws.IRState.RawX2;
+                points2D[11] = ws.IRState.RawY2;
             }
             else
             {
@@ -301,6 +397,8 @@ namespace Wii3d
                 lblCam2IR3Raw.Text = ws.IRState.RawX3.ToString() + ", " + ws.IRState.RawY3.ToString();
                 lblCam2IR3.BackColor = Color.Blue;
                 lblCam2IR3Raw.BackColor = Color.Blue;
+                points2D[12] = ws.IRState.RawX3;
+                points2D[13] = ws.IRState.RawY3;
             }
             else
             {
@@ -315,6 +413,8 @@ namespace Wii3d
                 lblCam2IR4Raw.Text = ws.IRState.RawX4.ToString() + ", " + ws.IRState.RawY4.ToString();
                 lblCam2IR4.BackColor = Color.Blue;
                 lblCam2IR4Raw.BackColor = Color.Blue;
+                points2D[14] = ws.IRState.RawX4;
+                points2D[15] = ws.IRState.RawY4;
             }
             else
             {
