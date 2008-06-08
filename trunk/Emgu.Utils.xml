@@ -1,0 +1,466 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Emgu.Utils</name>
+    </assembly>
+    <members>
+        <member name="T:Emgu.Data.Envelope`1">
+            <summary>
+            An envelope that contains the maximum and minimum value
+            </summary>
+        </member>
+        <member name="M:Emgu.Data.Envelope`1.#ctor">
+            <summary>
+            Create an envelope with default value
+            </summary>
+        </member>
+        <member name="M:Emgu.Data.Envelope`1.#ctor(`0,`0)">
+            <summary>
+            Create an envelope with specific data
+            </summary>
+            <param name="min">The lower bound</param>
+            <param name="max">The higher bound</param>
+        </member>
+        <member name="M:Emgu.Data.Envelope`1.InRange(`0)">
+            <summary>
+            Returns true if the value is in the envelope
+            </summary>
+            <param name="value">The value to check</param>
+            <returns>true if the value is in the envelope</returns>
+        </member>
+        <member name="P:Emgu.Data.Envelope`1.Max">
+            <summary>
+            The maximum value of the envelop
+            </summary>
+        </member>
+        <member name="P:Emgu.Data.Envelope`1.Min">
+            <summary>
+            The minimum value of the envelope
+            </summary>
+        </member>
+        <member name="T:Emgu.Data.Envelope3M`1">
+            <summary>
+            An Envelope that contains the maximum, minimun and mean
+            </summary>
+        </member>
+        <member name="M:Emgu.Data.Envelope3M`1.#ctor">
+            <summary>
+            Create an envelope with default value
+            </summary>
+        </member>
+        <member name="M:Emgu.Data.Envelope3M`1.#ctor(`0,`0,`0)">
+            <summary>
+            Create an envelope with the specific data
+            </summary>
+            <param name="min">The minimum value</param>
+            <param name="mean">The mean value</param>
+            <param name="max">The maximun value</param>
+        </member>
+        <member name="M:Emgu.Data.Envelope3M`1.op_Addition(Emgu.Data.Envelope3M{`0},Emgu.Data.Envelope3M{`0})">
+            <summary>
+            Add two envelops together and return the sum
+            </summary>
+            <param name="e1">The first envelop</param>
+            <param name="e2">The second envelop</param>
+            <returns>The sum of the two envelop</returns>
+        </member>
+        <member name="P:Emgu.Data.Envelope3M`1.Mean">
+            <summary>
+            The mean value of the envelop
+            </summary>
+        </member>
+        <member name="T:Emgu.UnmanagedObject">
+            <summary>
+            An abstract class that wrap around an unmanaged object
+            </summary>
+        </member>
+        <member name="T:Emgu.DisposableObject">
+            <summary>
+            An abstract class that wrap around a disposable object
+            </summary>
+        </member>
+        <member name="F:Emgu.DisposableObject.m_disposed">
+            <summary> Track whether Dispose has been called. </summary>
+        </member>
+        <member name="M:Emgu.DisposableObject.Dispose">
+            <summary>
+            The dispose function that implements IDisposable interface
+            </summary>
+        </member>
+        <member name="M:Emgu.DisposableObject.Dispose(System.Boolean)">
+            <summary> 
+             Release the all the memory associate with this object
+            </summary>
+        </member>
+        <member name="M:Emgu.DisposableObject.FreeUnmanagedObjects">
+            <summary>
+            Function use to release _ptr object
+            </summary>
+        </member>
+        <member name="M:Emgu.DisposableObject.Finalize">
+            <summary>
+            Destructor
+            </summary>
+        </member>
+        <member name="F:Emgu.UnmanagedObject._ptr">
+            <summary>
+            A pointer to the unmanaged object
+            </summary>
+        </member>
+        <member name="M:Emgu.UnmanagedObject.op_Implicit(Emgu.UnmanagedObject)~System.IntPtr">
+            <summary>
+            implicit operator for IntPtr
+            </summary>
+            <param name="obj"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Emgu.UnmanagedObject.Ptr">
+            <summary>
+            Pointer to the unmanaged object
+            </summary>
+        </member>
+        <member name="T:Emgu.Utils">
+            <summary>
+            utilities functions for Emgu
+            </summary>
+        </member>
+        <member name="M:Emgu.Utils.XmlSerialize``1(``0)">
+            <summary>
+            Convert an object to an xml document
+            </summary>
+            <typeparam name="T">The type of the object to be converted</typeparam>
+            <param name="o">The object to be serialized</param>
+            <returns>An xml document that represents the object</returns>
+        </member>
+        <member name="M:Emgu.Utils.XmlDeserialize``1(System.Xml.XmlDocument)">
+            <summary>
+            Convert an xml document to an object
+            </summary>
+            <typeparam name="T">The type of the object to be converted to</typeparam>
+            <param name="xDoc">The xml document</param>
+            <returns>The object representation as a result of the deserialization of the xml document</returns>
+        </member>
+        <member name="M:Emgu.Utils.XmlStringDeserialize``1(System.String)">
+            <summary>
+            Convert an xml string to an object
+            </summary>
+            <typeparam name="T">The type of the object to be converted to</typeparam>
+            <param name="xmlString">The xml document as a string</param>
+            <returns>The object representation as a result of the deserialization of the xml string</returns>
+        </member>
+        <member name="M:Emgu.Utils.FileToString(System.String,System.Char)">
+            <summary>
+            Read a text file to an array of string, each row are seperated using by the input seperator
+            </summary>
+            <param name="fileName">The text file to read from</param>
+            <param name="seperator">The row seperator</param>
+            <returns></returns>
+        </member>
+        <member name="M:Emgu.Utils.MergeBytes(System.Byte[],System.Byte[])">
+            <summary>
+            Merges two byte vector into one
+            </summary>
+            <param name="a">the first byte vector to be merged</param>
+            <param name="b">the second byte vector to be merged</param>
+            <returns></returns>
+        </member>
+        <member name="M:Emgu.Utils.ExecuteCmd(System.String,System.String)">
+            <summary>
+            Call a command from command line
+            </summary>
+            <param name="execFileName">The name of the executable</param>
+            <param name="arguments">The arguments to the executeable</param>
+            <returns>The standard output</returns>
+        </member>
+        <member name="M:Emgu.Utils.ToBytes``1(``0[])">
+            <summary>
+            Convert some generic vector to vector of Bytes
+            </summary>
+            <typeparam name="D">type of the input vector</typeparam>
+            <param name="data">array of data</param>
+            <returns>the byte vector</returns>
+        </member>
+        <member name="M:Emgu.Utils.CopyVector``1(``0[],System.IntPtr)">
+            <summary>
+            Copy a generic vector to the unmanaged memory
+            </summary>
+            <typeparam name="D">The data type of the vector</typeparam>
+            <param name="src">The source vector</param>
+            <param name="dest">Pointer to the destination unmanaged memory</param>
+        </member>
+        <member name="M:Emgu.Utils.CopyMatrix``1(``0[][],System.IntPtr)">
+            <summary>
+            Copy a jagged two dimensional array to the unmanaged memory
+            </summary>
+            <typeparam name="D">The data type of the jagged two dimensional</typeparam>
+            <param name="src">The src array</param>
+            <param name="dest">Pointer to the destination unmanaged memory</param>
+        </member>
+        <member name="M:Emgu.Utils.CopyMatrix``1(System.IntPtr,``0[][])">
+            <summary>
+            Copy a jagged two dimensional array from the unmanaged memory
+            </summary>
+            <typeparam name="D">The data type of the jagged two dimensional</typeparam>
+            <param name="src">The src array</param>
+            <param name="dest">Pointer to the destination unmanaged memory</param>
+        </member>
+        <member name="M:Emgu.Utils.memcpy(System.IntPtr,System.IntPtr,System.Int32)">
+            <summary>
+            memcpy function
+            </summary>
+            <param name="dest">the destination of memory copy</param>
+            <param name="src">the source of memory copy</param>
+            <param name="len">the number of bytes to be copied</param>
+        </member>
+        <member name="M:Emgu.Utils.LoadLibrary(System.String)">
+            <summary>
+            Maps the specified executable module into the address space of the calling process.
+            </summary>
+            <param name="dllname">The name of the dll</param>
+            <returns>The handle to the library</returns>
+        </member>
+        <member name="M:Emgu.Utils.FreeLibrary(System.IntPtr)">
+            <summary>
+            Decrements the reference count of the loaded dynamic-link library (DLL). When the reference count reaches zero, the module is unmapped from the address space of the calling process and the handle is no longer valid
+            </summary>
+            <param name="handle">The handle to the library</param>
+            <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
+        </member>
+        <member name="T:Emgu.Utils.Action">
+            <summary>
+            A mothod that contains no input and returns nothing
+            </summary>
+        </member>
+        <member name="T:Emgu.Utils.Action`2">
+            <summary>
+            An Action that accepts two input and returns nothing
+            </summary>
+            <typeparam name="TInput1"></typeparam>
+            <typeparam name="TInput2"></typeparam>
+            <param name="o1">The first input parameter</param>
+            <param name="o2">The second input parameter</param>
+        </member>
+        <member name="T:Emgu.Utils.Action`3">
+            <summary>
+            An Action that accepts three input and returns nothing
+            </summary>
+            <typeparam name="TInput1"></typeparam>
+            <typeparam name="TInput2"></typeparam>
+            <typeparam name="TInput3"></typeparam>
+            <param name="o1">The first input parameter</param>
+            <param name="o2">The second input parameter</param>
+            <param name="o3">The third input parameter</param>
+        </member>
+        <member name="T:Emgu.Utils.Action`4">
+            <summary>
+            An Action that accepts fourth input and returns nothing
+            </summary>
+            <typeparam name="TInput1"></typeparam>
+            <typeparam name="TInput2"></typeparam>
+            <typeparam name="TInput3"></typeparam>
+            <typeparam name="TInput4"></typeparam>
+            <param name="o1">The first input parameter</param>
+            <param name="o2">The second input parameter</param>
+            <param name="o3">The third input parameter</param>
+            <param name="o4">The fourth input parameter</param>
+        </member>
+        <member name="T:Emgu.Utils.Func`3">
+            <summary>
+            Delegate similar to that in .Net 3.5
+            </summary>
+            <typeparam name="TInput1"></typeparam>
+            <typeparam name="TInput2"></typeparam>
+            <typeparam name="TOutput"></typeparam>
+            <param name="o1"></param>
+            <param name="o2"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Emgu.Utils.Func`4">
+            <summary>
+            Delegate similar to that in .Net 3.5
+            </summary>
+            <typeparam name="TInput1"></typeparam>
+            <typeparam name="TInput2"></typeparam>
+            <typeparam name="TInput3"></typeparam>
+            <typeparam name="TOutput"></typeparam>
+            <param name="o1"></param>
+            <param name="o2"></param>
+            <param name="o3"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Emgu.Utils.Func`5">
+            <summary>
+            Delegate similar to that in .Net 3.5
+            </summary>
+            <typeparam name="TInput1"></typeparam>
+            <typeparam name="TInput2"></typeparam>
+            <typeparam name="TInput3"></typeparam>
+            <typeparam name="TInput4"></typeparam>
+            <typeparam name="TOutput"></typeparam>
+            <param name="o1"></param>
+            <param name="o2"></param>
+            <param name="o3"></param>
+            <param name="o4"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Emgu.Utils.StringEventArgs">
+            <summary>
+            Event argument that returns a string
+            </summary>
+        </member>
+        <member name="M:Emgu.Utils.StringEventArgs.#ctor(System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="msg">the message for this event</param>
+        </member>
+        <member name="P:Emgu.Utils.StringEventArgs.Message">
+            <summary>
+            The message for this EventArgs
+            </summary>
+        </member>
+        <member name="T:Emgu.ExceptionEnviorment">
+            <summary>
+            The exception enviormental information for Emgu class librarys
+            </summary>
+        </member>
+        <member name="P:Emgu.ExceptionEnviorment.ExceptionLevel">
+            <summary>
+            The current exception level
+            </summary>
+        </member>
+        <member name="T:Emgu.ExceptionLevel">
+            <summary>
+            The Level of exception
+            </summary>
+        </member>
+        <member name="F:Emgu.ExceptionLevel.Minor">
+            <summary>
+            Indicate the Exception level is Minor
+            </summary>
+        </member>
+        <member name="F:Emgu.ExceptionLevel.Low">
+            <summary>
+            Indicate the Exception level is Low
+            </summary>
+        </member>
+        <member name="F:Emgu.ExceptionLevel.Medium">
+            <summary>
+            Indicate the Exception level is Medium
+            </summary>
+        </member>
+        <member name="F:Emgu.ExceptionLevel.High">
+            <summary>
+            Indicate the Exception level is High
+            </summary>
+        </member>
+        <member name="F:Emgu.ExceptionLevel.Critical">
+            <summary>
+            Indicate the Exception level is Critical
+            </summary>
+        </member>
+        <member name="T:Emgu.PrioritizedException">
+            <summary>
+            The exception class used by Emgu programs
+            </summary>
+        </member>
+        <member name="M:Emgu.PrioritizedException.#ctor(Emgu.ExceptionLevel,System.String)">
+            <summary>
+            Create an exception with the specific header and message
+            </summary>
+            <param name="hdr"></param>
+            <param name="message"></param>
+        </member>
+        <member name="M:Emgu.PrioritizedException.isSevere">
+            <summary>
+            Check if the severity of the current exception is greater or equal to the serverity of the Exception Enviorment
+            </summary>
+            <returns>True if the serverity is greater or equal to the one defined in the Exception Enviorment</returns>
+        </member>
+        <member name="M:Emgu.PrioritizedException.Alert(System.Boolean)">
+            <summary>
+            Alert regardness of the severity of the exception
+            </summary>
+            <param name="syn">If true, the operation is synchronous, otherwise, asynchronous</param>
+        </member>
+        <member name="M:Emgu.PrioritizedException.AlertIfServere(System.Boolean)">
+            <summary>
+            Alert if the exception is severe
+            </summary>
+            <param name="syn">If true, the operation is synchronous, otherwise, asynchronous</param>
+        </member>
+        <member name="P:Emgu.PrioritizedException.ExceptionLevel">
+            <summary>
+            The level of Exception
+            </summary>
+        </member>
+        <member name="T:Emgu.Reflection.Operation`1">
+            <summary>
+            An operation contains a MethodInfo and the methods parameters. It provides a way to invoke a specific method with the specific parameters. 
+            </summary>
+            <typeparam name="T">The type of instance this operation applies to</typeparam>
+        </member>
+        <member name="M:Emgu.Reflection.Operation`1.#ctor(System.Reflection.MethodInfo,System.Object[])">
+            <summary>
+            Craete an operation using the specific method and parameters
+            </summary>
+            <param name="mi"></param>
+            <param name="parameters"></param>
+        </member>
+        <member name="M:Emgu.Reflection.Operation`1.ProcessMethod(`0)">
+            <summary>
+            Call the specific method with the specific parameters on the provided <paramref name="instance"/>
+            </summary>
+            <param name="instance">The instance to call the method</param>
+            <returns></returns>
+        </member>
+        <member name="M:Emgu.Reflection.Operation`1.ToString">
+            <summary>
+            Represent this operation as a string
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Emgu.Reflection.Operation`1.ToCode(System.String)">
+            <summary>
+            Represent this operation as code
+            </summary>
+            <param name="instanceName"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Emgu.Reflection.Operation`1.Method">
+            <summary>
+            The MethodInfo
+            </summary>
+        </member>
+        <member name="P:Emgu.Reflection.Operation`1.Parameters">
+            <summary>
+            The parameters for this method
+            </summary>
+        </member>
+        <member name="T:Emgu.Platform">
+            <summary>
+            Provide information for the platform which is using 
+            </summary>
+        </member>
+        <member name="P:Emgu.Platform.OperationSystem">
+            <summary>
+            The operating system that is using
+            </summary>
+        </member>
+        <member name="T:Emgu.OS">
+            <summary>
+            Type of operating system
+            </summary>
+        </member>
+        <member name="F:Emgu.OS.Windows">
+            <summary>
+            Windows
+            </summary>
+        </member>
+        <member name="F:Emgu.OS.Linux">
+            <summary>
+            Linux
+            </summary>
+        </member>
+    </members>
+</doc>
