@@ -1,0 +1,7 @@
+D:\Courses\Computer Vision\Project\Matrix\Example\bin\Debug\Example.exe
+D:\Courses\Computer Vision\Project\Matrix\Example\bin\Debug\Example.pdb
+D:\Courses\Computer Vision\Project\Matrix\Example\bin\Debug\GeneralMatrix.dll
+D:\Courses\Computer Vision\Project\Matrix\Example\bin\Debug\GeneralMatrix.pdb
+D:\Courses\Computer Vision\Project\Matrix\Example\obj\Debug\ResolveAssemblyReference.cache
+D:\Courses\Computer Vision\Project\Matrix\Example\obj\Debug\Example.exe
+D:\Courses\Computer Vision\Project\Matrix\Example\obj\Debug\Example.pdb

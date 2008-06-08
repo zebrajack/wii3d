@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.Text;
 using System.Windows.Forms;
 using WiimoteLib;
+using DotNetMatrix;
 
 namespace Wii3d
 {
@@ -19,6 +20,18 @@ namespace Wii3d
         Graphics g1;
         Bitmap b2 = new Bitmap(256, 192, PixelFormat.Format24bppRgb);
         Graphics g2;
+        float[] points2D = new float[16]; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
+                                          //*** Important: point2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
+        float [] points3D = new float[12];
+        int valid3DPointNumber;
+        int [] pairNumber = new int[4]; //p0 in camera1 is corresponds to p0 in camera2
+
+        // Extrinsic parameters of cameras
+        float[] cameraRot = new float[9]; //rotation matrix from camera2 to camera1
+        float[] cameraTrans = new float[3]; //translation from camera2 to camera1
+
+        // Intrisic parameters of cameras
+        float[] K = new float[9];
 
         public MainForm()
         {
@@ -49,6 +62,130 @@ namespace Wii3d
         private void wm_WiimoteChanged2(object sender, WiimoteChangedEventArgs args)
         {
             BeginInvoke(new UpdateWiimoteStateDelegate(UpdateWiimoteState2), args);
+        }
+
+        private void CameraCalibration()
+        {
+            
+        }
+
+        private void CrossProduct3( float[] t, float[] R, float [] result)
+        {
+            result[0] = -t[2] * R[3] + t[1] * R[6];
+            result[1] = -t[2] * R[4] + t[1] * R[7];
+            result[2] = -t[2] * R[5] + t[1] * R[8];
+            result[3] = t[2] * R[0] - t[0] * R[6];
+            result[4] = t[2] * R[1] - t[0] * R[7];
+            result[5] = t[2] * R[2] - t[0] * R[8];
+            result[6] = -t[1] * R[0] + t[0] * R[3];
+            result[7] = -t[1] * R[1] + t[0] * R[4];
+            result[8] = -t[1] * R[2] + t[0] * R[5];
+        }
+
+        private void MatrixMulVector(float[] m, float[] v, float[] result)
+        {
+            result[0] = m[0] * v[0] + m[1] * v[1] + m[2] * v[2];
+            result[1] = m[3] * v[0] + m[4] * v[1] + m[5] * v[2];
+            result[2] = m[6] * v[0] + m[7] * v[1] + m[8] * v[2];
+        }
+
+        private void Reconstruct3D()
+        {
+            float[] eMatrix = new float[9]; //essential matrix;
+            CrossProduct3(cameraTrans,cameraRot,eMatrix);
+
+            //Normalized 2D points
+            float[] normalizedPoints2D = new float[16];
+            
+            //Normalization
+            for (int i = 0; i < 8; i++)
+            {
+                normalizedPoints2D[2 * i] = (points2D[2 * i] - K[2]) / K[0]; //x
+                normalizedPoints2D[2 * i+1] = (points2D[2 * i+1] - K[5]) / K[4]; //y
+            }
+
+            //epipolar line: E*x
+            float[] eLine = new float[12]; //4 epipolar lines mapped from 4 2D Points in the first camera to second camera
+            for (int i=0; i < 4; i++)
+            {
+                eLine[3 * i] = eMatrix[0] * normalizedPoints2D[2 * i] + eMatrix[1] * normalizedPoints2D[2 * i + 1] + eMatrix[2];
+                eLine[3 * i + 1] = eMatrix[3] * normalizedPoints2D[2 * i] + eMatrix[4] * normalizedPoints2D[2 * i + 1] + eMatrix[5];
+                eLine[3 * i + 2] = eMatrix[6] * normalizedPoints2D[2 * i] + eMatrix[7] * normalizedPoints2D[2 * i + 1] + eMatrix[8];
+            }
+            
+            //calculate all pair combination and find the smallest engergy of x2'*E*x1 = 0
+            float energy = 99999.0f;
+
+            for (int i=4; i<8; i++)
+                for (int j = 4; j<8; j++)
+                    for (int k = 4; k < 8; k++)
+                        for (int l = 4; l < 8; l++)
+                        {
+                            if (i == j || j == k || k == l || i == k || j == l || i == l)
+                                continue;
+                            
+                            float tEnergy = 0;
+                            tEnergy += Math.Abs(normalizedPoints2D[2 * i] * eLine[3 * i] + normalizedPoints2D[2 * i + 1] * eLine[3 * i + 1] + eLine[3 * i + 2]);
+                            tEnergy += Math.Abs(normalizedPoints2D[2 * j] * eLine[3 * j] + normalizedPoints2D[2 * j + 1] * eLine[3 * j + 1] + eLine[3 * j + 2]);
+                            tEnergy += Math.Abs(normalizedPoints2D[2 * k] * eLine[3 * k] + normalizedPoints2D[2 * k + 1] * eLine[3 * k + 1] + eLine[3 * k + 2]);
+                            tEnergy += Math.Abs(normalizedPoints2D[2 * l] * eLine[3 * l] + normalizedPoints2D[2 * l + 1] * eLine[3 * l + 1] + eLine[3 * l + 2]);
+                            if (tEnergy < energy)
+                            {
+                                energy = tEnergy;
+                                pairNumber[0] = i;
+                                pairNumber[1] = j;
+                                pairNumber[2] = k;
+                                pairNumber[3] = l;
+                            }
+                        }
+
+
+            double[][] A = new double[4][];
+            for (int i = 0; i < 4; i++)
+                A[i] = new double[4];
+
+
+            //compute the 3D position according to the points position
+            //solve the least square solution of x * (PX) =0
+            //Reference: Multiple View Geometry in Computer Vision: p312
+            for (int i = 0; i < 4; i++)
+            {
+                A[i][0] = -1;
+                A[i][1] = 0;
+                A[i][2] = normalizedPoints2D[2*i];
+                A[i][3] = 0;
+
+                A[i][0] = 0;
+                A[i][1] = -1;
+                A[i][2] = normalizedPoints2D[2 * i+1];
+                A[i][3] = 0;
+
+                A[i][0] = -1;
+                A[i][1] = 0;
+                A[i][2] = normalizedPoints2D[2 * pairNumber[i]];
+                A[i][3] = 0;
+
+                A[i][0] = 0;
+                A[i][1] = -1;
+                A[i][2] = normalizedPoints2D[2 * pairNumber[i]+1];
+                A[i][3] = 0;
+
+
+                GeneralMatrix AG = new GeneralMatrix(A,4, 4);
+
+
+                GeneralMatrix BG = new GeneralMatrix(4, 1);
+
+                GeneralMatrix XG = new GeneralMatrix(4, 1);
+
+                XG = AG.Solve(BG);
+
+                points3D[i * 3] =  (float) (XG.GetElement(0,0)/ XG.GetElement(3,0));
+                points3D[i * 3 + 1] = (float)(XG.GetElement(1, 0) / XG.GetElement(3, 0));
+                points3D[i * 3 + 2] = (float)(XG.GetElement(2, 0) / XG.GetElement(3, 0));
+            }
+            
+
         }
 
         private void UpdateWiimoteState1(WiimoteChangedEventArgs args)
@@ -121,8 +258,8 @@ namespace Wii3d
                 g1.DrawEllipse(new Pen(Color.Yellow), (int)(ws.IRState.RawX3 / 4), (int)(ws.IRState.RawY3 / 4), ws.IRState.Size3 + 1, ws.IRState.Size3 + 1);
             if (ws.IRState.Found4)
                 g1.DrawEllipse(new Pen(Color.Orange), (int)(ws.IRState.RawX4 / 4), (int)(ws.IRState.RawY4 / 4), ws.IRState.Size4 + 1, ws.IRState.Size4 + 1);
-            if (ws.IRState.Found1 && ws.IRState.Found2)
-                g1.DrawEllipse(new Pen(Color.Green), (int)(ws.IRState.RawMidX / 4), (int)(ws.IRState.RawMidY / 4), 2, 2);
+            //if (ws.IRState.Found1 && ws.IRState.Found2)
+                //g1.DrawEllipse(new Pen(Color.Green), (int)(ws.IRState.RawMidX / 4), (int)(ws.IRState.RawMidY / 4), 2, 2);
             pbIR1.Image = b1;
         }
 

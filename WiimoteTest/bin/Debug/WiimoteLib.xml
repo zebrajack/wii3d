@@ -4,323 +4,6 @@
         <name>WiimoteLib</name>
     </assembly>
     <members>
-        <member name="T:WiimoteLib.Wiimote">
-            <summary>
-            Implementation of Wiimote
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.#ctor">
-            <summary>
-            Default constructor
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.Connect">
-            <summary>
-            Connect to the first Wiimote
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.Connect(System.Int32)">
-            <summary>
-            Connect to a Wiimote paired to the PC via Bluetooth, 
-            but skip the first seq wii remotes
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.Disconnect">
-            <summary>
-            Disconnect from the controller and stop reading data from it
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.BeginAsyncRead">
-            <summary>
-            Start reading asynchronously from the controller
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.OnReadData(System.IAsyncResult)">
-            <summary>
-            Callback when data is ready to be processed
-            </summary>
-            <param name="ar">State information for the callback</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ParseInput(System.Byte[])">
-            <summary>
-            Parse a report sent by the Wiimote
-            </summary>
-            <param name="buff">Data buffer to parse</param>
-            <returns>Returns a boolean noting whether an event needs to be posted</returns>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.InitializeExtension">
-            <summary>
-            Handles setting up an extension when plugged.  Currenlty only support the Nunchuk.
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.DecryptBuffer(System.Byte[])">
-            <summary>
-            Decrypts data sent from the extension to the Wiimote
-            </summary>
-            <param name="buff">Data buffer</param>
-            <returns>Byte array containing decoded data</returns>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ParseButtons(System.Byte[])">
-            <summary>
-            Parses a standard button report into the ButtonState struct
-            </summary>
-            <param name="buff">Data buffer</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ParseAccel(System.Byte[])">
-            <summary>
-            Parse accelerometer data
-            </summary>
-            <param name="buff">Data buffer</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ParseIR(System.Byte[])">
-            <summary>
-            Parse IR data from report
-            </summary>
-            <param name="buff">Data buffer</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ParseExtension(System.Byte[],System.Int32)">
-            <summary>
-            Parse data from an extension.  Nunchuk/Classic Controller support only.
-            </summary>
-            <param name="buff">Data buffer</param>
-            <param name="offset">Offset into data buffer</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ParseReadData(System.Byte[])">
-            <summary>
-            Parse data returned from a read report
-            </summary>
-            <param name="buff">Data buffer</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.GetRumbleBit">
-            <summary>
-            Returns whether rumble is currently enabled.
-            </summary>
-            <returns>Byte indicating true (0x01) or false (0x00)</returns>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ReadCalibration">
-            <summary>
-            Read calibration information stored on Wiimote, return true(success) or false(fail)
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.SetReportType(WiimoteLib.Wiimote.InputReport,System.Boolean)">
-            <summary>
-            Set Wiimote reporting mode
-            </summary>
-            <param name="type">Report type</param>
-            <param name="continuous">Continuous data</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.SetLEDs(System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
-            <summary>
-            Set the LEDs on the Wiimote
-            </summary>
-            <param name="led1">LED 1</param>
-            <param name="led2">LED 2</param>
-            <param name="led3">LED 3</param>
-            <param name="led4">LED 4</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.SetLEDs(System.Int32)">
-            <summary>
-            Set the LEDs on the Wiimote
-            </summary>
-            <param name="leds">The value to be lit up in base2 on the Wiimote</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.SetRumble(System.Boolean)">
-            <summary>
-            Toggle rumble
-            </summary>
-            <param name="on">On or off</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.GetStatus">
-            <summary>
-            Retrieve the current status of the Wiimote and extensions.  Replaces GetBatteryLevel() since it was poorly named.
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.EnableIR(WiimoteLib.IRMode)">
-            <summary>
-            Turn on the IR sensor
-            </summary>
-            <param name="mode">The data report mode</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.DisableIR">
-            <summary>
-            Disable the IR sensor
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ClearReport">
-            <summary>
-            Initialize the report data buffer
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.WriteReport">
-            <summary>
-            Write a report to the Wiimote
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.TestRead(System.Int32,System.Int16,System.Byte[]@)">
-            <summary>
-            Read data or register from Wiimote
-            </summary>
-            <param name="address">Address to read</param>
-            <param name="size">Length to read</param>
-            <param name="buff">Data buffer</param>
-            <returns>success or fail</returns>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.ReadData(System.Int32,System.Int16)">
-            <summary>
-            Read data or register from Wiimote
-            </summary>
-            <param name="address">Address to read</param>
-            <param name="size">Length to read</param>
-            <returns>Data buffer</returns>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.WriteData(System.Int32,System.Byte)">
-            <summary>
-            Write a single byte to the Wiimote
-            </summary>
-            <param name="address">Address to write</param>
-            <param name="data">Byte to write</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.WriteData(System.Int32,System.Byte,System.Byte[])">
-            <summary>
-            Write a byte array to a specified address
-            </summary>
-            <param name="address">Address to write</param>
-            <param name="size">Length of buffer</param>
-            <param name="buff">Data buffer</param>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.Dispose">
-            <summary>
-            Dispose Wiimote
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.Wiimote.Dispose(System.Boolean)">
-            <summary>
-            Dispose wiimote
-            </summary>
-            <param name="disposing">Disposing?</param>
-        </member>
-        <member name="E:WiimoteLib.Wiimote.WiimoteChanged">
-            <summary>
-            Event raised when Wiimote state is changed
-            </summary>
-        </member>
-        <member name="E:WiimoteLib.Wiimote.WiimoteExtensionChanged">
-            <summary>
-            Event raised when an extension is inserted or removed
-            </summary>
-        </member>
-        <member name="P:WiimoteLib.Wiimote.WiimoteState">
-            <summary>
-            Current Wiimote state
-            </summary>
-        </member>
-        <member name="P:WiimoteLib.Wiimote.AltWriteMethod">
-            <summary>
-             Force the PC to write to the Wiimote in an alternate way.  This should no longer be used.
-            </summary>
-        </member>
-        <member name="T:WiimoteLib.Wiimote.InputReport">
-            <summary>
-            The report format in which the Wiimote should return data
-            </summary>	
-        </member>
-        <member name="F:WiimoteLib.Wiimote.InputReport.Status">
-            <summary>
-            Status report
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.Wiimote.InputReport.ReadData">
-            <summary>
-            Read data from memory location
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.Wiimote.InputReport.Buttons">
-            <summary>
-            Button data only
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.Wiimote.InputReport.ButtonsAccel">
-            <summary>
-            Button and accelerometer data
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.Wiimote.InputReport.IRAccel">
-            <summary>
-            IR sensor and accelerometer data
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.Wiimote.InputReport.ButtonsExtension">
-            <summary>
-            Button and extension controller data
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.Wiimote.InputReport.ExtensionAccel">
-            <summary>
-            Extension and accelerometer data
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.Wiimote.InputReport.IRExtensionAccel">
-            <summary>
-            IR sensor, extension controller and accelerometer data
-            </summary>
-        </member>
-        <member name="T:WiimoteLib.HIDImports">
-            <summary>
-            Win32 import information for use with the Wiimote library
-            </summary>
-        </member>
-        <member name="T:WiimoteLib.WiimoteChangedEventHandler">
-            <summary>
-            Event to handle a state change on the Wiimote
-            </summary>
-            <param name="sender">Object sending the event</param>
-            <param name="args">Current Wiimote state</param>
-        </member>
-        <member name="T:WiimoteLib.WiimoteExtensionChangedEventHandler">
-            <summary>
-            Event to handle insertion/removal of an extension (Nunchuk/Classic Controller)
-            </summary>
-            <param name="sender">Object sending the event</param>
-            <param name="args">Current extension status</param>
-        </member>
-        <member name="T:WiimoteLib.WiimoteExtensionChangedEventArgs">
-            <summary>
-            Argument sent through the WiimoteExtensionChangedEvent
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.WiimoteExtensionChangedEventArgs.ExtensionType">
-            <summary>
-            The extenstion type inserted or removed
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.WiimoteExtensionChangedEventArgs.Inserted">
-            <summary>
-            Whether the extension was inserted or removed
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.WiimoteExtensionChangedEventArgs.#ctor(WiimoteLib.ExtensionType,System.Boolean)">
-            <summary>
-            Constructor
-            </summary>
-            <param name="type">The extension type inserted or removed</param>
-            <param name="inserted">Whether the extension was inserted or removed</param>
-        </member>
-        <member name="T:WiimoteLib.WiimoteChangedEventArgs">
-            <summary>
-            Argument sent through the WiimoteChangedEvent
-            </summary>
-        </member>
-        <member name="F:WiimoteLib.WiimoteChangedEventArgs.WiimoteState">
-            <summary>
-            The current state of the Wiimote and extension controllers
-            </summary>
-        </member>
-        <member name="M:WiimoteLib.WiimoteChangedEventArgs.#ctor(WiimoteLib.WiimoteState)">
-            <summary>
-            Constructor
-            </summary>
-            <param name="ws">Wiimote state</param>
-        </member>
         <member name="T:WiimoteLib.WiimoteState">
             <summary>
             Current overall state of the Wiimote and all attachments
@@ -1057,6 +740,323 @@
         <member name="F:WiimoteLib.IRMode.Full">
             <summary>
             Full mode (unsupported)
+            </summary>
+        </member>
+        <member name="T:WiimoteLib.HIDImports">
+            <summary>
+            Win32 import information for use with the Wiimote library
+            </summary>
+        </member>
+        <member name="T:WiimoteLib.WiimoteChangedEventHandler">
+            <summary>
+            Event to handle a state change on the Wiimote
+            </summary>
+            <param name="sender">Object sending the event</param>
+            <param name="args">Current Wiimote state</param>
+        </member>
+        <member name="T:WiimoteLib.WiimoteExtensionChangedEventHandler">
+            <summary>
+            Event to handle insertion/removal of an extension (Nunchuk/Classic Controller)
+            </summary>
+            <param name="sender">Object sending the event</param>
+            <param name="args">Current extension status</param>
+        </member>
+        <member name="T:WiimoteLib.WiimoteExtensionChangedEventArgs">
+            <summary>
+            Argument sent through the WiimoteExtensionChangedEvent
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.WiimoteExtensionChangedEventArgs.ExtensionType">
+            <summary>
+            The extenstion type inserted or removed
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.WiimoteExtensionChangedEventArgs.Inserted">
+            <summary>
+            Whether the extension was inserted or removed
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.WiimoteExtensionChangedEventArgs.#ctor(WiimoteLib.ExtensionType,System.Boolean)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="type">The extension type inserted or removed</param>
+            <param name="inserted">Whether the extension was inserted or removed</param>
+        </member>
+        <member name="T:WiimoteLib.WiimoteChangedEventArgs">
+            <summary>
+            Argument sent through the WiimoteChangedEvent
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.WiimoteChangedEventArgs.WiimoteState">
+            <summary>
+            The current state of the Wiimote and extension controllers
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.WiimoteChangedEventArgs.#ctor(WiimoteLib.WiimoteState)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="ws">Wiimote state</param>
+        </member>
+        <member name="T:WiimoteLib.Wiimote">
+            <summary>
+            Implementation of Wiimote
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.#ctor">
+            <summary>
+            Default constructor
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.Connect">
+            <summary>
+            Connect to the first Wiimote
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.Connect(System.Int32)">
+            <summary>
+            Connect to a Wiimote paired to the PC via Bluetooth, 
+            but skip the first seq wii remotes
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.Disconnect">
+            <summary>
+            Disconnect from the controller and stop reading data from it
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.BeginAsyncRead">
+            <summary>
+            Start reading asynchronously from the controller
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.OnReadData(System.IAsyncResult)">
+            <summary>
+            Callback when data is ready to be processed
+            </summary>
+            <param name="ar">State information for the callback</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ParseInput(System.Byte[])">
+            <summary>
+            Parse a report sent by the Wiimote
+            </summary>
+            <param name="buff">Data buffer to parse</param>
+            <returns>Returns a boolean noting whether an event needs to be posted</returns>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.InitializeExtension">
+            <summary>
+            Handles setting up an extension when plugged.  Currenlty only support the Nunchuk.
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.DecryptBuffer(System.Byte[])">
+            <summary>
+            Decrypts data sent from the extension to the Wiimote
+            </summary>
+            <param name="buff">Data buffer</param>
+            <returns>Byte array containing decoded data</returns>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ParseButtons(System.Byte[])">
+            <summary>
+            Parses a standard button report into the ButtonState struct
+            </summary>
+            <param name="buff">Data buffer</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ParseAccel(System.Byte[])">
+            <summary>
+            Parse accelerometer data
+            </summary>
+            <param name="buff">Data buffer</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ParseIR(System.Byte[])">
+            <summary>
+            Parse IR data from report
+            </summary>
+            <param name="buff">Data buffer</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ParseExtension(System.Byte[],System.Int32)">
+            <summary>
+            Parse data from an extension.  Nunchuk/Classic Controller support only.
+            </summary>
+            <param name="buff">Data buffer</param>
+            <param name="offset">Offset into data buffer</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ParseReadData(System.Byte[])">
+            <summary>
+            Parse data returned from a read report
+            </summary>
+            <param name="buff">Data buffer</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.GetRumbleBit">
+            <summary>
+            Returns whether rumble is currently enabled.
+            </summary>
+            <returns>Byte indicating true (0x01) or false (0x00)</returns>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ReadCalibration">
+            <summary>
+            Read calibration information stored on Wiimote, return true(success) or false(fail)
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.SetReportType(WiimoteLib.Wiimote.InputReport,System.Boolean)">
+            <summary>
+            Set Wiimote reporting mode
+            </summary>
+            <param name="type">Report type</param>
+            <param name="continuous">Continuous data</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.SetLEDs(System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
+            <summary>
+            Set the LEDs on the Wiimote
+            </summary>
+            <param name="led1">LED 1</param>
+            <param name="led2">LED 2</param>
+            <param name="led3">LED 3</param>
+            <param name="led4">LED 4</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.SetLEDs(System.Int32)">
+            <summary>
+            Set the LEDs on the Wiimote
+            </summary>
+            <param name="leds">The value to be lit up in base2 on the Wiimote</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.SetRumble(System.Boolean)">
+            <summary>
+            Toggle rumble
+            </summary>
+            <param name="on">On or off</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.GetStatus">
+            <summary>
+            Retrieve the current status of the Wiimote and extensions.  Replaces GetBatteryLevel() since it was poorly named.
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.EnableIR(WiimoteLib.IRMode)">
+            <summary>
+            Turn on the IR sensor
+            </summary>
+            <param name="mode">The data report mode</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.DisableIR">
+            <summary>
+            Disable the IR sensor
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ClearReport">
+            <summary>
+            Initialize the report data buffer
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.WriteReport">
+            <summary>
+            Write a report to the Wiimote
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.TestRead(System.Int32,System.Int16,System.Byte[]@)">
+            <summary>
+            Read data or register from Wiimote
+            </summary>
+            <param name="address">Address to read</param>
+            <param name="size">Length to read</param>
+            <param name="buff">Data buffer</param>
+            <returns>success or fail</returns>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.ReadData(System.Int32,System.Int16)">
+            <summary>
+            Read data or register from Wiimote
+            </summary>
+            <param name="address">Address to read</param>
+            <param name="size">Length to read</param>
+            <returns>Data buffer</returns>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.WriteData(System.Int32,System.Byte)">
+            <summary>
+            Write a single byte to the Wiimote
+            </summary>
+            <param name="address">Address to write</param>
+            <param name="data">Byte to write</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.WriteData(System.Int32,System.Byte,System.Byte[])">
+            <summary>
+            Write a byte array to a specified address
+            </summary>
+            <param name="address">Address to write</param>
+            <param name="size">Length of buffer</param>
+            <param name="buff">Data buffer</param>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.Dispose">
+            <summary>
+            Dispose Wiimote
+            </summary>
+        </member>
+        <member name="M:WiimoteLib.Wiimote.Dispose(System.Boolean)">
+            <summary>
+            Dispose wiimote
+            </summary>
+            <param name="disposing">Disposing?</param>
+        </member>
+        <member name="E:WiimoteLib.Wiimote.WiimoteChanged">
+            <summary>
+            Event raised when Wiimote state is changed
+            </summary>
+        </member>
+        <member name="E:WiimoteLib.Wiimote.WiimoteExtensionChanged">
+            <summary>
+            Event raised when an extension is inserted or removed
+            </summary>
+        </member>
+        <member name="P:WiimoteLib.Wiimote.WiimoteState">
+            <summary>
+            Current Wiimote state
+            </summary>
+        </member>
+        <member name="P:WiimoteLib.Wiimote.AltWriteMethod">
+            <summary>
+             Force the PC to write to the Wiimote in an alternate way.  This should no longer be used.
+            </summary>
+        </member>
+        <member name="T:WiimoteLib.Wiimote.InputReport">
+            <summary>
+            The report format in which the Wiimote should return data
+            </summary>	
+        </member>
+        <member name="F:WiimoteLib.Wiimote.InputReport.Status">
+            <summary>
+            Status report
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.Wiimote.InputReport.ReadData">
+            <summary>
+            Read data from memory location
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.Wiimote.InputReport.Buttons">
+            <summary>
+            Button data only
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.Wiimote.InputReport.ButtonsAccel">
+            <summary>
+            Button and accelerometer data
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.Wiimote.InputReport.IRAccel">
+            <summary>
+            IR sensor and accelerometer data
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.Wiimote.InputReport.ButtonsExtension">
+            <summary>
+            Button and extension controller data
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.Wiimote.InputReport.ExtensionAccel">
+            <summary>
+            Extension and accelerometer data
+            </summary>
+        </member>
+        <member name="F:WiimoteLib.Wiimote.InputReport.IRExtensionAccel">
+            <summary>
+            IR sensor, extension controller and accelerometer data
             </summary>
         </member>
     </members>
