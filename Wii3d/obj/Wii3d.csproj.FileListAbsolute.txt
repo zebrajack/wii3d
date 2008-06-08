@@ -22,3 +22,10 @@ D:\Courses\Computer Vision\Project\Wii3d\obj\Debug\Wii3d.Properties.Resources.re
 D:\Courses\Computer Vision\Project\Wii3d\obj\Debug\Wii3d.csproj.GenerateResource.Cache
 d:\Courses\Computer Vision\Project\Wii3d\bin\Debug\GeneralMatrix.dll
 d:\Courses\Computer Vision\Project\Wii3d\bin\Debug\GeneralMatrix.pdb
+D:\Courses\Computer Vision\Project\Wii3d\bin\Debug\Emgu.CV.dll
+D:\Courses\Computer Vision\Project\Wii3d\bin\Debug\Emgu.Utils.dll
+D:\Courses\Computer Vision\Project\Wii3d\bin\Debug\zlib.net.dll
+D:\Courses\Computer Vision\Project\Wii3d\bin\Debug\Emgu.CV.pdb
+D:\Courses\Computer Vision\Project\Wii3d\bin\Debug\Emgu.CV.xml
+D:\Courses\Computer Vision\Project\Wii3d\bin\Debug\Emgu.Utils.pdb
+D:\Courses\Computer Vision\Project\Wii3d\bin\Debug\Emgu.Utils.xml
