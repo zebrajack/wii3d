@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wii3d", "Wii3d\Wii3d.csproj
 		{37A555DF-7012-4B99-8A47-1C922A361E52} = {37A555DF-7012-4B99-8A47-1C922A361E52}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeneralMatrix", "Matrix\GeneralMatrix.csproj", "{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,16 @@ Global
 		{03FBC2D7-3446-4724-9CA3-1B108048B07B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{03FBC2D7-3446-4724-9CA3-1B108048B07B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{03FBC2D7-3446-4724-9CA3-1B108048B07B}.Release|Win32.ActiveCfg = Release|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}.Release|Win32.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

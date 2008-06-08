@@ -68,6 +68,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Matrix\GeneralMatrix.csproj">
+      <Project>{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}</Project>
+      <Name>GeneralMatrix</Name>
+    </ProjectReference>
     <ProjectReference Include="..\WiimoteLib\WiimoteLib.csproj">
       <Project>{37A555DF-7012-4B99-8A47-1C922A361E52}</Project>
       <Name>WiimoteLib</Name>
