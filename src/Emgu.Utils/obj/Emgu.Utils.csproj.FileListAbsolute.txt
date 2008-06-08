@@ -1,0 +1,11 @@
+E:\research\wii3d\emgu\src\bin\Emgu.Utils.dll
+E:\research\wii3d\emgu\src\bin\Emgu.Utils.pdb
+E:\research\wii3d\emgu\src\Emgu.Utils\obj\Debug\ResolveAssemblyReference.cache
+E:\research\wii3d\emgu\src\Emgu.Utils\obj\Debug\Emgu.Utils.dll
+E:\research\wii3d\emgu\src\Emgu.Utils\obj\Debug\Emgu.Utils.pdb
+E:\research\wii3d\emgu\src\bin\Emgu.Utils.xml
+E:\research\wii3d\emgu\src\Emgu.Utils\bin\Release\Emgu.Utils.dll
+E:\research\wii3d\emgu\src\Emgu.Utils\bin\Release\Emgu.Utils.pdb
+E:\research\wii3d\emgu\src\Emgu.Utils\obj\Release\ResolveAssemblyReference.cache
+E:\research\wii3d\emgu\src\Emgu.Utils\obj\Release\Emgu.Utils.dll
+E:\research\wii3d\emgu\src\Emgu.Utils\obj\Release\Emgu.Utils.pdb
