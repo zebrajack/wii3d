@@ -1,5 +1,0 @@
-D:\Courses\Computer Vision\Project\Matrix\bin\Debug\GeneralMatrix.dll
-D:\Courses\Computer Vision\Project\Matrix\bin\Debug\GeneralMatrix.pdb
-D:\Courses\Computer Vision\Project\Matrix\obj\Debug\ResolveAssemblyReference.cache
-D:\Courses\Computer Vision\Project\Matrix\obj\Debug\GeneralMatrix.dll
-D:\Courses\Computer Vision\Project\Matrix\obj\Debug\GeneralMatrix.pdb
