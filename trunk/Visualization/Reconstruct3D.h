@@ -27,10 +27,10 @@ void Calibration()
 	//initialized
 	int l1=points2D[0]<points2D[2]?0:1;
 	int l2 =1-l1;
-	int u1 = points2D[1]<points2D[3]?0:1;
-	int u2 = 1-u1;
+	int d1 = points2D[1]<points2D[3]?0:1;
+	int d2 = 1-d1;
 	float lsecmin = max(points2D[0],points2D[2]);
-	float usecmin = max(points2D[1],points2D[3]);
+	float dsecmin = max(points2D[1],points2D[3]);
 
 	for (int i = 2; i < 4; i++ )
 	{
@@ -49,18 +49,18 @@ void Calibration()
 			lsecmin = points2D[2 * l2];
 		}
 
-		if (points2D[2 * i + 1] < usecmin)
+		if (points2D[2 * i + 1] < dsecmin)
 		{
-			if (points2D[2 * u1+1] < points2D[2 * i + 1])
+			if (points2D[2 * d1+1] < points2D[2 * i + 1])
 			{
-				u2 = i;
+				d2 = i;
 			}
 			else
 			{
-				u2 = u1;
-				u1 = i;
+				d2 = d1;
+				d1 = i;
 			}
-			usecmin = points2D[2 * u2+1];
+			dsecmin = points2D[2 * d2+1];
 		}
 	}
 
@@ -74,10 +74,10 @@ void Calibration()
 			x = -1;
 		else
 			x = 1;
-		if (u1 == i || u2 == i)
-			y = 1;
-		else
+		if (d1 == i || d2 == i)
 			y = -1;
+		else
+			y = 1;
 
 		p3[3*i] = x;
 		p3[3*i+1] = y;
@@ -114,11 +114,11 @@ void Calibration()
 
 	//Second camera
 	l1=points2D[8]<points2D[10]?4:5;
-	l2 =1-l1+4;
-	u1 = points2D[9]<points2D[11]?4:5;
-	u2 = 1-u1+4;
+	l2 =9-l1;
+	d1 = points2D[9]<points2D[11]?4:5;
+	d2 = 9-d1;
 	lsecmin = max(points2D[8],points2D[10]);
-	usecmin = max(points2D[9],points2D[11]);
+	dsecmin = max(points2D[9],points2D[11]);
 
 	for (int i = 6; i < 8; i++ )
 	{
@@ -137,18 +137,18 @@ void Calibration()
 			lsecmin = points2D[2 * l2];
 		}
 
-		if (points2D[2 * i + 1] < usecmin)
+		if (points2D[2 * i + 1] < dsecmin)
 		{
-			if (points2D[2 * u1+1] < points2D[2 * i + 1])
+			if (points2D[2 * d1+1] < points2D[2 * i + 1])
 			{
-				u2 = i;
+				d2 = i;
 			}
 			else
 			{
-				u2 = u1;
-				u1 = i;
+				d2 = d1;
+				d1 = i;
 			}
-			usecmin = points2D[2 * u2+1];
+			dsecmin = points2D[2 * d2+1];
 		}
 	}
 
@@ -160,10 +160,10 @@ void Calibration()
 			x = -1;
 		else
 			x = 1;
-		if (u1 == i+4 || u2 == i+4)
-			y = 1;
-		else
+		if (d1 == i+4 || d2 == i+4)
 			y = -1;
+		else
+			y = 1;
 
 		p3[3*i] = x;
 		p3[3*i+1] = y;
@@ -194,29 +194,85 @@ void Calibration()
 		printf("\n");
 	}
 	
+	printf("Rotation Vector 1 Got from 4 Points:\n");
+	for (int i = 0; i<3; i++)
+	{
+		printf("%f\t",rotVec1->data.fl[i]);
+	}
+	printf("\n");
+
+	printf("Rotation Vector 2 Got from 4 Points:\n");
+	for (int i = 0; i<3; i++)
+	{
+		printf("%f\t",rotVec2->data.fl[i]);
+	}
+	printf("\n");
+
 	// R = R2*inv(R1), to make the camera1 's rotation matrix as identity
-	//cameraRot[0] = rotMat1->data.fl[0] * rotMat2->data.fl[0] + rotMat1->data.fl[3] * rotMat2->data.fl[3] + rotMat1->data.fl[6] * rotMat2->data.fl[6];
-	//cameraRot[1] = rotMat1->data.fl[0] * rotMat2->data.fl[1] + rotMat1->data.fl[3] * rotMat2->data.fl[4] + rotMat1->data.fl[6] * rotMat2->data.fl[7];
-	//cameraRot[2] = rotMat1->data.fl[0] * rotMat2->data.fl[2] + rotMat1->data.fl[3] * rotMat2->data.fl[5] + rotMat1->data.fl[6] * rotMat2->data.fl[8];
-	//cameraRot[3] = rotMat1->data.fl[1] * rotMat2->data.fl[0] + rotMat1->data.fl[4] * rotMat2->data.fl[3] + rotMat1->data.fl[7] * rotMat2->data.fl[6];
-	//cameraRot[4] = rotMat1->data.fl[1] * rotMat2->data.fl[1] + rotMat1->data.fl[4] * rotMat2->data.fl[4] + rotMat1->data.fl[7] * rotMat2->data.fl[7];
-	//cameraRot[5] = rotMat1->data.fl[1] * rotMat2->data.fl[2] + rotMat1->data.fl[4] * rotMat2->data.fl[5] + rotMat1->data.fl[7] * rotMat2->data.fl[8];
-	//cameraRot[6] = rotMat1->data.fl[2] * rotMat2->data.fl[0] + rotMat1->data.fl[5] * rotMat2->data.fl[3] + rotMat1->data.fl[8] * rotMat2->data.fl[6];
-	//cameraRot[7] = rotMat1->data.fl[2] * rotMat2->data.fl[1] + rotMat1->data.fl[5] * rotMat2->data.fl[4] + rotMat1->data.fl[8] * rotMat2->data.fl[7];
-	//cameraRot[8] = rotMat1->data.fl[2] * rotMat2->data.fl[2] + rotMat1->data.fl[5] * rotMat2->data.fl[5] + rotMat1->data.fl[8] * rotMat2->data.fl[8];
 	cameraRot[0] = rotMat1->data.fl[0] * rotMat2->data.fl[0] + rotMat1->data.fl[1] * rotMat2->data.fl[1] + rotMat1->data.fl[2] * rotMat2->data.fl[2];
 	cameraRot[1] = rotMat1->data.fl[3] * rotMat2->data.fl[0] + rotMat1->data.fl[4] * rotMat2->data.fl[1] + rotMat1->data.fl[5] * rotMat2->data.fl[2];
 	cameraRot[2] = rotMat1->data.fl[6] * rotMat2->data.fl[0] + rotMat1->data.fl[7] * rotMat2->data.fl[1] + rotMat1->data.fl[8] * rotMat2->data.fl[2];
-	cameraRot[0] = rotMat1->data.fl[0] * rotMat2->data.fl[3] + rotMat1->data.fl[1] * rotMat2->data.fl[4] + rotMat1->data.fl[2] * rotMat2->data.fl[5];
-	cameraRot[1] = rotMat1->data.fl[3] * rotMat2->data.fl[3] + rotMat1->data.fl[4] * rotMat2->data.fl[4] + rotMat1->data.fl[5] * rotMat2->data.fl[5];
-	cameraRot[2] = rotMat1->data.fl[6] * rotMat2->data.fl[3] + rotMat1->data.fl[7] * rotMat2->data.fl[4] + rotMat1->data.fl[8] * rotMat2->data.fl[5];	
-	cameraRot[0] = rotMat1->data.fl[0] * rotMat2->data.fl[6] + rotMat1->data.fl[1] * rotMat2->data.fl[7] + rotMat1->data.fl[2] * rotMat2->data.fl[8];
-	cameraRot[1] = rotMat1->data.fl[3] * rotMat2->data.fl[6] + rotMat1->data.fl[4] * rotMat2->data.fl[7] + rotMat1->data.fl[5] * rotMat2->data.fl[8];
-	cameraRot[2] = rotMat1->data.fl[6] * rotMat2->data.fl[6] + rotMat1->data.fl[7] * rotMat2->data.fl[7] + rotMat1->data.fl[8] * rotMat2->data.fl[8];
-	// t = t2 - t1, to make the camera1 stand at 0,0,0
+	cameraRot[3] = rotMat1->data.fl[0] * rotMat2->data.fl[3] + rotMat1->data.fl[1] * rotMat2->data.fl[4] + rotMat1->data.fl[2] * rotMat2->data.fl[5];
+	cameraRot[4] = rotMat1->data.fl[3] * rotMat2->data.fl[3] + rotMat1->data.fl[4] * rotMat2->data.fl[4] + rotMat1->data.fl[5] * rotMat2->data.fl[5];
+	cameraRot[5] = rotMat1->data.fl[6] * rotMat2->data.fl[3] + rotMat1->data.fl[7] * rotMat2->data.fl[4] + rotMat1->data.fl[8] * rotMat2->data.fl[5];	
+	cameraRot[6] = rotMat1->data.fl[0] * rotMat2->data.fl[6] + rotMat1->data.fl[1] * rotMat2->data.fl[7] + rotMat1->data.fl[2] * rotMat2->data.fl[8];
+	cameraRot[7] = rotMat1->data.fl[3] * rotMat2->data.fl[6] + rotMat1->data.fl[4] * rotMat2->data.fl[7] + rotMat1->data.fl[5] * rotMat2->data.fl[8];
+	cameraRot[8] = rotMat1->data.fl[6] * rotMat2->data.fl[6] + rotMat1->data.fl[7] * rotMat2->data.fl[7] + rotMat1->data.fl[8] * rotMat2->data.fl[8];
+
+	printf("R1:\n");
 	for (int i=0; i<3; i++)
-		cameraTrans[i] = transVec2->data.fl[i] - transVec1->data.fl[i];
+	{
+		for (int j =0; j<3; j++)
+		{
+			printf("%f\t", rotMat1->data.fl[i*3+j]);
+		}
+		printf("\n");
+	}
+
+	printf("R1:\n");
+	for (int i=0; i<3; i++)
+	{
+		for (int j =0; j<3; j++)
+		{
+			printf("%f\t", rotMat2->data.fl[i*3+j]);
+		}
+		printf("\n");
+	}
 	
+	
+	printf("R new between Camera2 and Camera1:\n");
+	for (int i=0; i<3; i++)
+	{
+		for (int j =0; j<3; j++)
+		{
+			printf("%f\t", cameraRot[i*3+j]);
+		}
+		printf("\n");
+	}
+
+	printf("T1:\n");	
+	for (int i = 0; i<3; i++)
+	{
+		printf("%f\t",transVec1->data.fl[i]);
+	}
+	printf("\n");
+
+	printf("T2:\n");	
+	for (int i = 0; i<3; i++)
+	{
+		printf("%f\t",transVec2->data.fl[i]);
+	}
+	printf("\n");
+
+	printf("New Trans:\n");
+	// t = t2 - R2*inv(R1)*t1, to make the camera1 stand at 0,0,0
+	for (int i=0; i<3; i++)
+	{
+		cameraTrans[i] = transVec2->data.fl[i] - (cameraRot[3*i]*transVec1->data.fl[0]+cameraRot[3*i+1]*transVec1->data.fl[1]+cameraRot[3*i+2]*transVec1->data.fl[2]);
+		printf("%f\t",cameraTrans[i]);
+	}
+	printf("\n");
+
 	calibrated = true;
 }
 
