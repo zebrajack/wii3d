@@ -79,7 +79,7 @@ namespace Wii3d
             float lsecmin = Math.Max(points2D[0],points2D[2]);
             float usecmin = Math.Max(points2D[1],points2D[3]);
 
-            for (int i = 3; i < 4; i++ )
+            for (int i = 2; i < 4; i++ )
             {
                 if (points2D[2 * i] < lsecmin)
                 {
@@ -98,16 +98,16 @@ namespace Wii3d
 
                 if (points2D[2 * i + 1] < usecmin)
                 {
-                    if (points2D[2 * u1] < points2D[2 * i + 1])
+                    if (points2D[2 * u1+1] < points2D[2 * i + 1])
                     {
                         u2 = i;
                     }
                     else
                     {
-                        u2 = l1;
+                        u2 = u1;
                         u1 = i;
                     }
-                    usecmin = points2D[2 * u2];
+                    usecmin = points2D[2 * u2+1];
                 }
             }
             
@@ -116,7 +116,7 @@ namespace Wii3d
             IntrinsicCameraParameters ip2 = new IntrinsicCameraParameters();
             ExtrinsicCameraParameters ep2 = new ExtrinsicCameraParameters();
       
-            Matrix<int> count = new Matrix<int>(1,1);
+            Matrix<Byte> count = new Matrix<Byte>(1,1);
             count.SetValue(4);
             MCvSize imageSize = new MCvSize(1024, 768);
 
@@ -283,6 +283,7 @@ namespace Wii3d
                 lblCam1IR1Raw.BackColor = Color.Blue;
                 points2D[0] = ws.IRState.RawX1;
                 points2D[1] = ws.IRState.RawY1;
+                
             }
             else
             {
@@ -331,6 +332,7 @@ namespace Wii3d
                 lblCam1IR4Raw.BackColor = Color.Blue;
                 points2D[6] = ws.IRState.RawX4;
                 points2D[7] = ws.IRState.RawY4;
+                Calibration();
             }
             else
             {

@@ -24,3 +24,14 @@ E:\research\wii3d\emgu\src\Emgu.CV\obj\Release\Emgu.CV.UI.PropertyDlg.resources
 E:\research\wii3d\emgu\src\Emgu.CV\obj\Release\Emgu.CV.csproj.GenerateResource.Cache
 E:\research\wii3d\emgu\src\Emgu.CV\obj\Release\Emgu.CV.dll
 E:\research\wii3d\emgu\src\Emgu.CV\obj\Release\Emgu.CV.pdb
+d:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\ResolveAssemblyReference.cache
+d:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\Emgu.CV.UI.ImageBox.resources
+d:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\Emgu.CV.UI.ImageProperty.resources
+d:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\Emgu.CV.UI.ImageViewer.resources
+d:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\Emgu.CV.UI.ParamInputDlg.resources
+d:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\Emgu.CV.UI.PropertyDlg.resources
+d:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\Emgu.CV.csproj.GenerateResource.Cache
+d:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\Emgu.CV.pdb
+D:\Courses\Computer Vision\Project\src\bin\Emgu.CV.dll
+D:\Courses\Computer Vision\Project\src\bin\Emgu.CV.pdb
+D:\Courses\Computer Vision\Project\src\Emgu.CV\obj\Debug\Emgu.CV.dll

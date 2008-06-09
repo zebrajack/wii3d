@@ -4,76 +4,6 @@
         <name>Emgu.Utils</name>
     </assembly>
     <members>
-        <member name="T:Emgu.Data.Envelope`1">
-            <summary>
-            An envelope that contains the maximum and minimum value
-            </summary>
-        </member>
-        <member name="M:Emgu.Data.Envelope`1.#ctor">
-            <summary>
-            Create an envelope with default value
-            </summary>
-        </member>
-        <member name="M:Emgu.Data.Envelope`1.#ctor(`0,`0)">
-            <summary>
-            Create an envelope with specific data
-            </summary>
-            <param name="min">The lower bound</param>
-            <param name="max">The higher bound</param>
-        </member>
-        <member name="M:Emgu.Data.Envelope`1.InRange(`0)">
-            <summary>
-            Returns true if the value is in the envelope
-            </summary>
-            <param name="value">The value to check</param>
-            <returns>true if the value is in the envelope</returns>
-        </member>
-        <member name="P:Emgu.Data.Envelope`1.Max">
-            <summary>
-            The maximum value of the envelop
-            </summary>
-        </member>
-        <member name="P:Emgu.Data.Envelope`1.Min">
-            <summary>
-            The minimum value of the envelope
-            </summary>
-        </member>
-        <member name="T:Emgu.Data.Envelope3M`1">
-            <summary>
-            An Envelope that contains the maximum, minimun and mean
-            </summary>
-        </member>
-        <member name="M:Emgu.Data.Envelope3M`1.#ctor">
-            <summary>
-            Create an envelope with default value
-            </summary>
-        </member>
-        <member name="M:Emgu.Data.Envelope3M`1.#ctor(`0,`0,`0)">
-            <summary>
-            Create an envelope with the specific data
-            </summary>
-            <param name="min">The minimum value</param>
-            <param name="mean">The mean value</param>
-            <param name="max">The maximun value</param>
-        </member>
-        <member name="M:Emgu.Data.Envelope3M`1.op_Addition(Emgu.Data.Envelope3M{`0},Emgu.Data.Envelope3M{`0})">
-            <summary>
-            Add two envelops together and return the sum
-            </summary>
-            <param name="e1">The first envelop</param>
-            <param name="e2">The second envelop</param>
-            <returns>The sum of the two envelop</returns>
-        </member>
-        <member name="P:Emgu.Data.Envelope3M`1.Mean">
-            <summary>
-            The mean value of the envelop
-            </summary>
-        </member>
-        <member name="T:Emgu.UnmanagedObject">
-            <summary>
-            An abstract class that wrap around an unmanaged object
-            </summary>
-        </member>
         <member name="T:Emgu.DisposableObject">
             <summary>
             An abstract class that wrap around a disposable object
@@ -100,23 +30,6 @@
         <member name="M:Emgu.DisposableObject.Finalize">
             <summary>
             Destructor
-            </summary>
-        </member>
-        <member name="F:Emgu.UnmanagedObject._ptr">
-            <summary>
-            A pointer to the unmanaged object
-            </summary>
-        </member>
-        <member name="M:Emgu.UnmanagedObject.op_Implicit(Emgu.UnmanagedObject)~System.IntPtr">
-            <summary>
-            implicit operator for IntPtr
-            </summary>
-            <param name="obj"></param>
-            <returns></returns>
-        </member>
-        <member name="P:Emgu.UnmanagedObject.Ptr">
-            <summary>
-            Pointer to the unmanaged object
             </summary>
         </member>
         <member name="T:Emgu.Utils">
@@ -319,6 +232,74 @@
             The message for this EventArgs
             </summary>
         </member>
+        <member name="T:Emgu.Platform">
+            <summary>
+            Provide information for the platform which is using 
+            </summary>
+        </member>
+        <member name="P:Emgu.Platform.OperationSystem">
+            <summary>
+            The operating system that is using
+            </summary>
+        </member>
+        <member name="T:Emgu.OS">
+            <summary>
+            Type of operating system
+            </summary>
+        </member>
+        <member name="F:Emgu.OS.Windows">
+            <summary>
+            Windows
+            </summary>
+        </member>
+        <member name="F:Emgu.OS.Linux">
+            <summary>
+            Linux
+            </summary>
+        </member>
+        <member name="T:Emgu.Reflection.Operation`1">
+            <summary>
+            An operation contains a MethodInfo and the methods parameters. It provides a way to invoke a specific method with the specific parameters. 
+            </summary>
+            <typeparam name="T">The type of instance this operation applies to</typeparam>
+        </member>
+        <member name="M:Emgu.Reflection.Operation`1.#ctor(System.Reflection.MethodInfo,System.Object[])">
+            <summary>
+            Craete an operation using the specific method and parameters
+            </summary>
+            <param name="mi"></param>
+            <param name="parameters"></param>
+        </member>
+        <member name="M:Emgu.Reflection.Operation`1.ProcessMethod(`0)">
+            <summary>
+            Call the specific method with the specific parameters on the provided <paramref name="instance"/>
+            </summary>
+            <param name="instance">The instance to call the method</param>
+            <returns></returns>
+        </member>
+        <member name="M:Emgu.Reflection.Operation`1.ToString">
+            <summary>
+            Represent this operation as a string
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Emgu.Reflection.Operation`1.ToCode(System.String)">
+            <summary>
+            Represent this operation as code
+            </summary>
+            <param name="instanceName"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Emgu.Reflection.Operation`1.Method">
+            <summary>
+            The MethodInfo
+            </summary>
+        </member>
+        <member name="P:Emgu.Reflection.Operation`1.Parameters">
+            <summary>
+            The parameters for this method
+            </summary>
+        </member>
         <member name="T:Emgu.ExceptionEnviorment">
             <summary>
             The exception enviormental information for Emgu class librarys
@@ -394,72 +375,91 @@
             The level of Exception
             </summary>
         </member>
-        <member name="T:Emgu.Reflection.Operation`1">
+        <member name="T:Emgu.Data.Envelope`1">
             <summary>
-            An operation contains a MethodInfo and the methods parameters. It provides a way to invoke a specific method with the specific parameters. 
+            An envelope that contains the maximum and minimum value
             </summary>
-            <typeparam name="T">The type of instance this operation applies to</typeparam>
         </member>
-        <member name="M:Emgu.Reflection.Operation`1.#ctor(System.Reflection.MethodInfo,System.Object[])">
+        <member name="M:Emgu.Data.Envelope`1.#ctor">
             <summary>
-            Craete an operation using the specific method and parameters
+            Create an envelope with default value
             </summary>
-            <param name="mi"></param>
-            <param name="parameters"></param>
         </member>
-        <member name="M:Emgu.Reflection.Operation`1.ProcessMethod(`0)">
+        <member name="M:Emgu.Data.Envelope`1.#ctor(`0,`0)">
             <summary>
-            Call the specific method with the specific parameters on the provided <paramref name="instance"/>
+            Create an envelope with specific data
             </summary>
-            <param name="instance">The instance to call the method</param>
+            <param name="min">The lower bound</param>
+            <param name="max">The higher bound</param>
+        </member>
+        <member name="M:Emgu.Data.Envelope`1.InRange(`0)">
+            <summary>
+            Returns true if the value is in the envelope
+            </summary>
+            <param name="value">The value to check</param>
+            <returns>true if the value is in the envelope</returns>
+        </member>
+        <member name="P:Emgu.Data.Envelope`1.Max">
+            <summary>
+            The maximum value of the envelop
+            </summary>
+        </member>
+        <member name="P:Emgu.Data.Envelope`1.Min">
+            <summary>
+            The minimum value of the envelope
+            </summary>
+        </member>
+        <member name="T:Emgu.Data.Envelope3M`1">
+            <summary>
+            An Envelope that contains the maximum, minimun and mean
+            </summary>
+        </member>
+        <member name="M:Emgu.Data.Envelope3M`1.#ctor">
+            <summary>
+            Create an envelope with default value
+            </summary>
+        </member>
+        <member name="M:Emgu.Data.Envelope3M`1.#ctor(`0,`0,`0)">
+            <summary>
+            Create an envelope with the specific data
+            </summary>
+            <param name="min">The minimum value</param>
+            <param name="mean">The mean value</param>
+            <param name="max">The maximun value</param>
+        </member>
+        <member name="M:Emgu.Data.Envelope3M`1.op_Addition(Emgu.Data.Envelope3M{`0},Emgu.Data.Envelope3M{`0})">
+            <summary>
+            Add two envelops together and return the sum
+            </summary>
+            <param name="e1">The first envelop</param>
+            <param name="e2">The second envelop</param>
+            <returns>The sum of the two envelop</returns>
+        </member>
+        <member name="P:Emgu.Data.Envelope3M`1.Mean">
+            <summary>
+            The mean value of the envelop
+            </summary>
+        </member>
+        <member name="T:Emgu.UnmanagedObject">
+            <summary>
+            An abstract class that wrap around an unmanaged object
+            </summary>
+        </member>
+        <member name="F:Emgu.UnmanagedObject._ptr">
+            <summary>
+            A pointer to the unmanaged object
+            </summary>
+        </member>
+        <member name="M:Emgu.UnmanagedObject.op_Implicit(Emgu.UnmanagedObject)~System.IntPtr">
+            <summary>
+            implicit operator for IntPtr
+            </summary>
+            <param name="obj"></param>
             <returns></returns>
         </member>
-        <member name="M:Emgu.Reflection.Operation`1.ToString">
+        <member name="P:Emgu.UnmanagedObject.Ptr">
             <summary>
-            Represent this operation as a string
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:Emgu.Reflection.Operation`1.ToCode(System.String)">
-            <summary>
-            Represent this operation as code
-            </summary>
-            <param name="instanceName"></param>
-            <returns></returns>
-        </member>
-        <member name="P:Emgu.Reflection.Operation`1.Method">
-            <summary>
-            The MethodInfo
-            </summary>
-        </member>
-        <member name="P:Emgu.Reflection.Operation`1.Parameters">
-            <summary>
-            The parameters for this method
-            </summary>
-        </member>
-        <member name="T:Emgu.Platform">
-            <summary>
-            Provide information for the platform which is using 
-            </summary>
-        </member>
-        <member name="P:Emgu.Platform.OperationSystem">
-            <summary>
-            The operating system that is using
-            </summary>
-        </member>
-        <member name="T:Emgu.OS">
-            <summary>
-            Type of operating system
-            </summary>
-        </member>
-        <member name="F:Emgu.OS.Windows">
-            <summary>
-            Windows
-            </summary>
-        </member>
-        <member name="F:Emgu.OS.Linux">
-            <summary>
-            Linux
+            Pointer to the unmanaged object
             </summary>
         </member>
     </members>
