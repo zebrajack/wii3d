@@ -5,7 +5,7 @@
 #include <math.h>
 #include <cv.h>
 #include "linear/jama_qr.h"
-float points2D[16] ; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
+float points2D[16]; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
                                   //*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
 float points3D[12];
 
@@ -94,39 +94,59 @@ void Calibration()
 
 	cvCalibrateCamera2(&mP43D, &mP42D1, &mCount, cvSize(1024,768),intrinsicMat1,distortionCoeff, rotVec1, transVec1);
 	for (int i=0; i<9; i++)
-		K1[i] = intrinsicMat1->data.db[i];
+		K1[i] = intrinsicMat1->data.fl[i];
 
+	CvMat * rotMat1 = cvCreateMat(3,3,CV_32FC1);
+	cvRodrigues2( rotVec1, rotMat1);
 
 	printf("Intrisic Matrix1 Got from 4 Points:\n");
 	for (int i=0; i<3; i++)
 	{
 		for (int j =0; j<3; j++)
 		{
-			printf("%f\t", intrinsicMat1->data.db[i*3+j]);
+			printf("%f\t", intrinsicMat1->data.fl[i*3+j]);
 		}
 		printf("\n");
 	}
 
+	//Second camera
 	CvMat * intrinsicMat2 = cvCreateMat(3,3,CV_32FC1);
 	CvMat * rotVec2 = cvCreateMat(3,1,CV_32FC1);
 	CvMat * transVec2 = cvCreateMat(3,1,CV_32FC1);
 
-	//Second camera
 	CvMat mP42D2 = cvMat(4,2,CV_32FC1,points2D+8);
 	cvCalibrateCamera2(&mP43D, &mP42D2, &mCount, cvSize(1024,768),intrinsicMat2,distortionCoeff, rotVec2, transVec2);
 
 	for (int i=0; i<9; i++)
-		K2[i] = intrinsicMat2->data.db[i];
+		K2[i] = intrinsicMat2->data.fl[i];
 
+	CvMat * rotMat2 = cvCreateMat(3,3,CV_32FC1);
+	cvRodrigues2( rotVec2, rotMat2);
+	
 	printf("Intrisic Matrix2 Got from 4 Points:\n");
 	for (int i=0; i<3; i++)
 	{
 		for (int j =0; j<3; j++)
 		{
-			printf("%f\t", intrinsicMat2->data.db[i*3+j]);
+			printf("%f\t", intrinsicMat2->data.fl[i*3+j]);
 		}
 		printf("\n");
 	}
+	
+	// R = inv(R1)*R2, to make the camera1 's rotation matrix as identity
+	cameraRot[0] = rotMat1->data.fl[0] * rotMat2->data.fl[0] + rotMat1->data.fl[3] * rotMat2->data.fl[3] + rotMat1->data.fl[6] * rotMat2->data.fl[6];
+	cameraRot[1] = rotMat1->data.fl[0] * rotMat2->data.fl[1] + rotMat1->data.fl[3] * rotMat2->data.fl[4] + rotMat1->data.fl[6] * rotMat2->data.fl[7];
+	cameraRot[2] = rotMat1->data.fl[0] * rotMat2->data.fl[2] + rotMat1->data.fl[3] * rotMat2->data.fl[5] + rotMat1->data.fl[6] * rotMat2->data.fl[8];
+	cameraRot[3] = rotMat1->data.fl[1] * rotMat2->data.fl[0] + rotMat1->data.fl[4] * rotMat2->data.fl[3] + rotMat1->data.fl[7] * rotMat2->data.fl[6];
+	cameraRot[4] = rotMat1->data.fl[1] * rotMat2->data.fl[1] + rotMat1->data.fl[4] * rotMat2->data.fl[4] + rotMat1->data.fl[7] * rotMat2->data.fl[7];
+	cameraRot[5] = rotMat1->data.fl[1] * rotMat2->data.fl[2] + rotMat1->data.fl[4] * rotMat2->data.fl[5] + rotMat1->data.fl[7] * rotMat2->data.fl[8];
+	cameraRot[6] = rotMat1->data.fl[2] * rotMat2->data.fl[0] + rotMat1->data.fl[5] * rotMat2->data.fl[3] + rotMat1->data.fl[8] * rotMat2->data.fl[6];
+	cameraRot[7] = rotMat1->data.fl[2] * rotMat2->data.fl[1] + rotMat1->data.fl[5] * rotMat2->data.fl[4] + rotMat1->data.fl[8] * rotMat2->data.fl[7];
+	cameraRot[8] = rotMat1->data.fl[2] * rotMat2->data.fl[2] + rotMat1->data.fl[5] * rotMat2->data.fl[5] + rotMat1->data.fl[8] * rotMat2->data.fl[8];
+
+	// t = t2 - t1, to make the camera1 stand at 0,0,0
+	for (int i=0; i<3; i++)
+		cameraTrans[i] = transVec2->data.fl[i] - transVec1->data.fl[i];
 	
 }
 
@@ -173,6 +193,7 @@ void Reconstruct3D()
 
 	//epipolar line: E*x
 	float eLine[12]; //4 epipolar lines mapped from 4 2D Points in the first camera to second camera
+
 	for (int i=0; i < 4; i++)
 	{
 		eLine[3 * i] = eMatrix[0] * normalizedPoints2D[2 * i] + eMatrix[1] * normalizedPoints2D[2 * i + 1] + eMatrix[2];
@@ -255,7 +276,6 @@ void Reconstruct3D()
 					points3D[i * 3 + 2] = TNT_X[2][0]/TNT_X[3][0];
 
 				}
-
 
 }
 
