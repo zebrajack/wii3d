@@ -8,8 +8,14 @@
 #include <gl/glut.h>
 #include "bitmap_fonts.h"
 #include "reconstruct3D.h"
+#using <System.dll>
 
-
+using namespace System;
+using namespace System::Text;
+using namespace System::IO;
+using namespace System::Net;
+using namespace System::Net::Sockets;
+using namespace System::Collections;
 
 
 
@@ -29,6 +35,15 @@ float marksPosition[3*MARKNUM];
 int g_nWindowWidth = 400;
 int g_nWindowHeight = 400;
 char infoText[300];
+
+
+struct IRState {
+	bool found;
+	int x;
+	int y;
+	int size;
+};
+
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -181,9 +196,100 @@ void MouseMotion(int x,int y)
 
 }
 
+Socket^ ConnectSocket( String^ server, int port )
+{
+   Socket^ s = nullptr;
+   IPHostEntry^ hostEntry = nullptr;
+
+   // Get host related information.
+   hostEntry = Dns::Resolve( server );
+
+   // Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
+   // an exception that occurs when the host IP Address is not compatible with the address family
+   // (typical in the IPv6 case).
+   IEnumerator^ myEnum = hostEntry->AddressList->GetEnumerator();
+   while ( myEnum->MoveNext() )
+   {
+      IPAddress^ address = safe_cast<IPAddress^>(myEnum->Current);
+      IPEndPoint^ endPoint = gcnew IPEndPoint( address,port );
+      Socket^ tmpS = gcnew Socket( endPoint->AddressFamily,SocketType::Stream,ProtocolType::Tcp );
+      tmpS->Connect( endPoint );
+      if ( tmpS->Connected )
+      {
+         s = tmpS;
+         break;
+      }
+      else
+      {
+         continue;
+      }
+   }
+   return s;
+}
+
+array<Byte>^ SocketSendReceive( String^ server, int port )
+{
+   array<Byte>^ bytesReceived = gcnew array<Byte>(2048);
+
+   // Create a socket connection with the specified server and port.
+   Socket^ s = ConnectSocket( server, port );
+   if ( s == nullptr )
+      return nullptr;
+
+   // Receive the server home page content.
+   int nbytes = 0;
+   do
+   {
+      nbytes = s->Receive( bytesReceived, bytesReceived->Length, static_cast<SocketFlags>(0) );
+   }
+   while ( nbytes > 0 );
+
+   return bytesReceived;
+}
+
+void parsePacket(IRState* cam, array<Byte>^ packet)
+{
+	int pos = 2;
+	for(int i = 0; i < 4; i++)
+	{
+		cam[i].found = BitConverter::ToBoolean(packet, pos);
+		pos += 1;
+		cam[i].x = BitConverter::ToInt32(packet, pos);
+		pos += 4;
+		cam[i].y = BitConverter::ToInt32(packet, pos);
+		pos += 4;
+		cam[i].size = BitConverter::ToInt32(packet, pos);
+		pos += 4;
+	}
+}
 
 void main(int argc, char ** argv)
 {
+	//SocketSendReceive("127.0.0.1", 6464);
+   array<Byte>^ bytesReceived = gcnew array<Byte>(64);
+   IRState* cam1 = new IRState[4];
+   IRState* cam2 = new IRState[4];
+
+   // Create a socket connection with the specified server and port.
+   Socket^ s = ConnectSocket("127.0.0.1", 6464);
+   if ( s == nullptr || s->Connected == false)
+      exit(-1);
+
+   int nbytes = 0;
+   do
+   {
+	   nbytes = s->Receive(bytesReceived, 64, static_cast<SocketFlags>(0));
+	   if(bytesReceived[0] == 0x01) //camera1
+	   {
+		   parsePacket(cam1, bytesReceived);
+	   }
+	   else
+	   {
+		   parsePacket(cam2, bytesReceived);
+	   }
+
+   } while(nbytes > 0 && s->Connected);
+
 	glutInit(&argc, argv);
 	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize (g_nWindowWidth, g_nWindowHeight);
@@ -200,7 +306,8 @@ void main(int argc, char ** argv)
 	glutIdleFunc(Idle);
 	glutMainLoop();
 
-	return;
+
+	exit(0);
 
 }
 
