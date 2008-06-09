@@ -65,7 +65,12 @@ void RenderMark(float * markPositionArrays, int markNum)
 	glBegin(GL_POINTS);
 	for (int i=0; i<markNum; i++)
 		glVertex3f(markPositionArrays[i*3],markPositionArrays[i*3+1],markPositionArrays[i*3+2]);
-
+	}
+	
+	//render two cameras
+	glColor4f(1.0f,0.0f,0.0f,0.0f);
+	glVertex3f(0,0,0);
+	glVertex3f(cameraTrans[0],cameraTrans[1],cameraTrans[2]);
 	glEnd();
 }
 
@@ -155,6 +160,11 @@ void Keyboard(unsigned char key,int x,int y)
 
 	case 'd':
 	case 'D':
+		break;
+
+	case 'c':
+	case 'C':
+		Calibration();
 		break;
 
 	}
