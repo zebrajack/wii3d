@@ -18,7 +18,6 @@ using namespace System::Net::Sockets;
 using namespace System::Collections;
 
 
-
 #define MARKNUM 4
 
 //////////////////////////////////////////////////////////////////////////
@@ -37,6 +36,7 @@ int g_nWindowHeight = 400;
 char infoText[300];
 
 
+
 struct IRState {
 	bool found;
 	int x;
@@ -46,14 +46,15 @@ struct IRState {
 
 
 //////////////////////////////////////////////////////////////////////////
+void Display();
 
 void Init()
 {
 	for (int i=0; i<MARKNUM; i++)
 	{
-		marksPosition[i*3] = i*10;
-		marksPosition[i*3+1] = i*10;
-		marksPosition[i*3+2] = i*10;
+		marksPosition[i*3] = i*10+20;
+		marksPosition[i*3+1] = i*10-20;
+		marksPosition[i*3+2] = i*10+10;
 	}
 
 }
@@ -64,6 +65,11 @@ void RenderMark(float * markPositionArrays, int markNum)
 	glPointSize(15);
 	glBegin(GL_POINTS);
 	for (int i=0; i<markNum; i++)
+	{
+		//glPushMatrix();
+		//glTranslatef(markPositionArrays[i*3],markPositionArrays[i*3+1],markPositionArrays[i*3+2]);
+		//glutWireSphere(0.1,16,16);
+		//glPopMatrix();
 		glVertex3f(markPositionArrays[i*3],markPositionArrays[i*3+1],markPositionArrays[i*3+2]);
 	}
 	
@@ -77,7 +83,7 @@ void RenderMark(float * markPositionArrays, int markNum)
 void RenderCoordinates()
 {
 	glBegin(GL_LINES);
-
+	
 	glColor4f(1.0f,0.0f,0.0f,0.0f);
 	glVertex3f(0.0f,0.0f,0.0f);
 	glVertex3f(50.0f,0.0f,0.0f);
@@ -94,34 +100,6 @@ void RenderCoordinates()
 }
 
 
-void Display()
-{
-	glClearColor(0.0,0.0,0.0,0.0);
-	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT );
-	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
-	glPushMatrix();
-	
-	//Arcball
-	glTranslatef(0.0,0.0,g_fZ);
-	glRotatef( -g_fSpin[1], 1.0f, 0.0f, 0.0f );
-	glRotatef( -g_fSpin[0], 0.0f, 1.0f, 0.0f );
-
-	RenderCoordinates();
-	RenderMark(marksPosition,MARKNUM);
-	glPopMatrix();
-
-	sprintf( infoText, "P2:%.2f,%.2f,%.2f\n", marksPosition[3], marksPosition[4],marksPosition[5]);
-
-	beginRenderText( g_nWindowWidth, g_nWindowHeight );
-    {
-        glColor3f( 1.0f, 1.0f, 1.0f );
-        renderText( 5, 15, BITMAP_FONT_TYPE_HELVETICA_12, infoText );
-    }
-    endRenderText();
-
-	glutSwapBuffers();
-}
 
 void Reshape(int w, int h)
 {
@@ -136,7 +114,7 @@ void Reshape(int w, int h)
 
 void Idle()
 {
-	glutPostRedisplay();
+	Display();
 }
 
 void Keyboard(unsigned char key,int x,int y)
@@ -273,33 +251,38 @@ void parsePacket(IRState* cam, array<Byte>^ packet)
 	}
 }
 
+void Display()
+{
+	glClearColor(0.0,0.0,0.0,0.0);
+	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT );
+	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+	glPushMatrix();
+
+	//Arcball
+	glTranslatef(0.0,0.0,g_fZ);
+	glRotatef( -g_fSpin[1], 1.0f, 0.0f, 0.0f );
+	glRotatef( -g_fSpin[0], 0.0f, 1.0f, 0.0f );
+
+	RenderCoordinates();
+	RenderMark(marksPosition,MARKNUM);
+	glPopMatrix();
+
+	sprintf( infoText, "P2:%.2f,%.2f,%.2f\n", marksPosition[3], marksPosition[4],marksPosition[5]);
+
+	beginRenderText( g_nWindowWidth, g_nWindowHeight );
+	{
+		glColor3f( 1.0f, 1.0f, 1.0f );
+		renderText( 5, 15, BITMAP_FONT_TYPE_HELVETICA_12, infoText );
+	}
+	endRenderText();
+
+	glutSwapBuffers();
+
+}
+
 void main(int argc, char ** argv)
 {
-	//SocketSendReceive("127.0.0.1", 6464);
-   array<Byte>^ bytesReceived = gcnew array<Byte>(64);
-   IRState* cam1 = new IRState[4];
-   IRState* cam2 = new IRState[4];
-
-   // Create a socket connection with the specified server and port.
-   Socket^ s = ConnectSocket("127.0.0.1", 6464);
-   if ( s == nullptr || s->Connected == false)
-      exit(-1);
-
-   int nbytes = 0;
-   do
-   {
-	   nbytes = s->Receive(bytesReceived, 64, static_cast<SocketFlags>(0));
-	   if(bytesReceived[0] == 0x01) //camera1
-	   {
-		   parsePacket(cam1, bytesReceived);
-	   }
-	   else
-	   {
-		   parsePacket(cam2, bytesReceived);
-	   }
-
-   } while(nbytes > 0 && s->Connected);
-
 	glutInit(&argc, argv);
 	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
 	glutInitWindowSize (g_nWindowWidth, g_nWindowHeight);
@@ -314,8 +297,67 @@ void main(int argc, char ** argv)
 	glutMouseFunc(Mouse);
 	glutMotionFunc(MouseMotion);
 	glutIdleFunc(Idle);
-	glutMainLoop();
 
+	//SocketSendReceive("127.0.0.1", 6464);
+	array<Byte>^ bytesReceived = gcnew array<Byte>(64);
+	IRState* cam1 = new IRState[4];
+	IRState* cam2 = new IRState[4];
+
+	// Create a socket connection with the specified server and port.
+	Socket^ s = ConnectSocket("127.0.0.1", 6464);
+	if ( s == nullptr || s->Connected == false)
+		exit(-1);
+
+	int nbytes = 0;
+	bool cam1new = false;
+	bool cam2new = false;
+	
+	do
+	{
+
+		nbytes = s->Receive(bytesReceived, 64, static_cast<SocketFlags>(0));
+		if(bytesReceived[0] == 0x01) //camera1
+		{
+			parsePacket(cam1, bytesReceived);
+			for (int i=0; i<4; i++)
+			{
+				if (cam1[i].found)
+				{
+					points2D[2*i] = cam1[i].x;
+					points2D[2*i+1] = cam1[i].y;
+				}
+			}
+			cam1new = true;
+
+		}
+		else
+		{
+			parsePacket(cam2, bytesReceived);
+			for (int i=0; i<4; i++)
+			{
+				if (cam2[i].found)
+				{
+					points2D[2*i+8] = cam2[i].x;
+					points2D[2*i+9] = cam2[i].y;
+				}
+			}
+			cam2new = true;
+		}
+		if (!calibrated && cam1new && cam2new)
+			Calibration();
+
+		if (cam1new && cam2new && calibrated)
+		{
+			Reconstruct3D();
+			Display();
+			cam1new = false;
+			cam2new = false;
+		}
+
+
+	} while(nbytes > 0 && s->Connected);
+
+	glutMainLoop();
 
 	exit(0);
 
