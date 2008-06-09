@@ -28,10 +28,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Emgu.CV, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Emgu.CV.dll</HintPath>
-    </Reference>
     <Reference Include="Emgu.Utils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Emgu.Utils.dll</HintPath>
@@ -79,6 +75,10 @@
     <ProjectReference Include="..\Matrix\GeneralMatrix.csproj">
       <Project>{6ABA6EAD-58B0-4FCE-A97F-BC884281A170}</Project>
       <Name>GeneralMatrix</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\src\Emgu.CV\Emgu.CV.csproj">
+      <Project>{9A1A77FE-F01B-495E-87B7-4B16E4F8C908}</Project>
+      <Name>Emgu.CV</Name>
     </ProjectReference>
     <ProjectReference Include="..\WiimoteLib\WiimoteLib.csproj">
       <Project>{37A555DF-7012-4B99-8A47-1C922A361E52}</Project>

@@ -9,3 +9,9 @@ E:\research\wii3d\emgu\src\Emgu.Utils\bin\Release\Emgu.Utils.pdb
 E:\research\wii3d\emgu\src\Emgu.Utils\obj\Release\ResolveAssemblyReference.cache
 E:\research\wii3d\emgu\src\Emgu.Utils\obj\Release\Emgu.Utils.dll
 E:\research\wii3d\emgu\src\Emgu.Utils\obj\Release\Emgu.Utils.pdb
+d:\Courses\Computer Vision\Project\src\bin\Emgu.Utils.dll
+d:\Courses\Computer Vision\Project\src\bin\Emgu.Utils.pdb
+d:\Courses\Computer Vision\Project\src\Emgu.Utils\obj\Debug\ResolveAssemblyReference.cache
+d:\Courses\Computer Vision\Project\src\Emgu.Utils\obj\Debug\Emgu.Utils.dll
+d:\Courses\Computer Vision\Project\src\Emgu.Utils\obj\Debug\Emgu.Utils.pdb
+D:\Courses\Computer Vision\Project\src\bin\Emgu.Utils.xml

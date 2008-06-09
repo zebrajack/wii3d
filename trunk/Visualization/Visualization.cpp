@@ -7,6 +7,11 @@
 #include <iostream>
 #include <gl/glut.h>
 #include "bitmap_fonts.h"
+#include "reconstruct3D.h"
+
+
+
+
 
 #define MARKNUM 4
 
@@ -198,3 +203,4 @@ void main(int argc, char ** argv)
 	return;
 
 }
+

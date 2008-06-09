@@ -55,7 +55,7 @@ namespace Emgu.CV.CameraCalibration
         public static void CalibrateCamera2(
             Point3D<float>[] objectPoints,
             Point2D<float>[] imagePoints,
-            Matrix<int> pointCounts,
+            Matrix<Byte> pointCounts,
             MCvSize imageSize,
             ref IntrinsicCameraParameters intrin,
             ref ExtrinsicCameraParameters extrin,
