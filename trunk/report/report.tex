@@ -238,6 +238,29 @@ Lower Right & 6.000002	& -5.999998	& 0.000006 \\[1ex]
 \hline
 \end{tabular}
 \end{table}
+\item Errors estimated by measure physical distance. As we mentioned in previous test, absolute world localation is hard to be measured precisely without advanced tools. However, measuring physical distance is a practical way to estimate error. In this test case, we move and rotate the calibration board randomly in front of the cameras. The recoved 3D coordinates should keeps the square property that each side of it equals to 12 inches. Here's one example data from the testing case. The average error is about 0.5 inches. 
+\begin{table}[ht]
+\caption{3D Coordinates of the 4 calibration board corners}
+\centering
+\begin{tabular}{c c c}
+\hline\hline
+x & y & z\\[0.5ex]
+\hline
+    0.4689 &   0.7950 &  -4.4373\\
+   -0.7016  & 12.6611 &  -5.1707\\
+   12.0272 &   1.9217 &  -4.3831\\
+   10.9004 &  13.6335  & -5.1552 \\[1ex]
+\hline
+\end{tabular}
+\begin{tabular}{c c c c}
+side1 & side2 & side3 &side4\\[0.5ex]
+11.7912&11.9463&11.6426&11.6132\\
+\hline
+\end{tabular}
+\end{table}
+
+
+
 \item Moving along a straight line. We move the calibration board along the x axis. The reconstructed 3D coordinates are plot in the matlab as follow. Since the movement are done manually without any tools, the trace of these two movement jagged a little. But still you can see the same clear path of 4 LEDs and the y coordinates of the 4 LEDs almost keeps unchanged. 
 \begin{figure}
 \centering
