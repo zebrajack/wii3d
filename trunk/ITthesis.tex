@@ -1,0 +1,79 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+
+\title{CUDA GMRES FOR IMAGE MATTING}
+
+%\titlerunning{Short form of title}        % if too long for running head
+
+\author{Yi~Gong\\ygong@cs.ucsb.edu\\University of California, Santa Barbara}
+
+
+
+\date{}
+% The correct dates will be entered by the editor
+
+\begin{document}
+
+
+\maketitle
+
+\section*{Abstract}
+
+
+\small
+\section*{Keywords} GMRES, SPARSE MATRIX, GPGPU, CUDA
+\section{Image Matting}
+Image matting is a currently hot problem in computer vision and computer graphics area. Given a natual image that contains some foreground objects and background, image matting wants to segment the image into foreground part and background part. For some area that contain both foreground color and background color, like transparent gauze or hair, it also needs to calculate the percentage of foreground color and background color. This segmentation can be described as:
+\equation{
+I = \alpha F + (1-\alpha) B
+}
+\endequation
+where $I$ is the original image that composed of pixels, $F$ is the foreground image contains the foreground color of every pixel in the image, dark if the pixel is totally background, similarly B is the background image. $\alpha$ is the most important part of this equation, which represent to the precentage of $F$ and $B$. White pixels in $\alpha$ image means they are totally foreground and black ones corresponds to background. Gray scaled ones tells percentage of transparency. From this equation, we can see that the color of each image pixel is a linear combination of the color of foreground and background. 
+
+\section{Sparse Matrix Solver}
+To solve large unsymmetric sparse matrix, BiCG, BiCGStab and GMRES are popularly used methods. Most of the time, BiCG converge fastest but GMRES is the most stable. BiCGStab is somewhat like a combo of them. To enhance the stabilty and acclerate the convergence, preconditioners can be applied. But preconditioners will also bring computation and memory cost, and benefit they gained depends on the context. Sometimes it will even be slower if using preconditioners. According to my experiments based on MATLAB GMRES and BiCGStab, I find that GMRES without preconditioner is the most efficient one to get the solution of the matrix of image matting problem. So I choose GMRES to implement. 
+
+\subsection{Restarted GMRES}
+As a projection method in the krylov subspace, GMRES requires to form orthogonal bases to search $x$ until $\|{b-Ax}\|_{2}$ is smaller than the tolerance. For large unsymmetric matrix, the process of orthogonalization is expensive both on space and time, because all previous bases need to be stored and used to calculate next basis. For this reason, restarted GMRES came on the stage.\\
+
+Most part of restarted GMRES is the same as GMRES. The difference is that restarted GMRES will search $x$ only in a small dimension krylov subspace. If $\|{b-Ax}\|_{2}$ cannot meet tolerance requirement after searching the small dimension, throw away all bases and rebuid them again and again, until the residual become smaller enough. Since the search dimension is shrinked in each iteration, the orthogonalization will become affordable. \\
+
+The implementation is based on the algorithm discribed in Saad's book, Chapter 6.5. I choose the modified Gram-Schmidt to do orthogonalization, as it is full of inner product and linear combination operations which is easy to be paralleled. Even the multiplication between a sparse matrix and a vector can also be paralleled by accumulate the A[:,i]*v[i] into SPA[i], where A[:,i] is the column i of sparse matrix A and v[i] is the \#i element of vector and SPA[i] is the \#i element of SPA. 
+
+\section{GPU Programming and CUDA}
+GPU(Graphics Unit Processors) is a currently prevailed parallel computation tool. It was built to accelerate 3D graphics computation at the initial time. But as time goes by, as its GFLOPS(Giga Floating Point Operations Per Second) increases super fast\label{gflops}, it attracts a lot of scientists of other area except for computer graphics guys. Till now, GPU is almost 7 times faster than CPU and its SIMD(Single Instruction Multiple Data) structure allows it to be built in a much lower cost than CPU. Since a lot of non-graphics parallel computation are also suitable for the SIMD structure of GPU, GPGPU(General Purpose Grphics Unit Processors) appears to meet the need of these kind of scitific computations. \\
+\begin{figure}
+    \centering
+    \includegraphics[width=12cm]{gflops.jpg}
+    \caption{Evolvement of Giga Floating Point Operations Per Seconds on GPU and CPU}
+    \label{gflops}
+\end{figure}
+
+Although SIMD structure brings GPU higher calculation speed, it also limits GPU's ability to process variaty commands. The first obvious problem is that SIMD can only execute the same instruction to variaty data in one clock cycle. Moreover, unlike CPU, codes like control flows on GPU will cut off performance dramatically because such operations may block parallel pipelines. Recursion are not allowed till now. Thus, GPU is not a panacea, a lot of issues need to be take care to gain performance. 
+\begin{enumerate}
+\item Avoid frequently copying data from host to device and vice versa.
+\item Reduce access conflicts. Namely, do not let a bunch of threads access the same address at the same time.
+\item Reduce branch code like `if...else'.
+\item Copy the data from global memory to shared memory which will be frequently access. The shared memory built on each multiprocessor is much fast than the global memory built on vedio card. Using shared memory can get benefit from cache and texture fetching.
+\end{enumerate}
+
+On the other hand, GPU programming is not as easy as CPU's.
+%\equation{L_{mix}(s) =
+%\min\limits_{k}(-\log p(s|k)+\log k)}
+%\endequation
+
+\section{Experiments}
+The experiments are executed on the platform configurated as follow:\\
+CPU: Intel Core2Duo T7300 2.0 GHz\\
+Host Memory: 2G\\
+GPU: FX570M with 2 multiprocessors and 256M Device Memory
+
+
+\section{Conclusions}
+
+
+%\bibliographystyle{amsplain}
+%\nocite{*}
+%\bibliography{template}
+
+\end{document}
