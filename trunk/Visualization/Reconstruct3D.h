@@ -479,7 +479,8 @@ void Reconstruct3D()
 					points3D[3*i] = cameraRot1[0]*p[0] + cameraRot1[3]*p[1] + cameraRot1[6]*p[2];
 					points3D[3*i+1] = cameraRot1[1]*p[0] + cameraRot1[4]*p[1] + cameraRot1[7]*p[2];
 					points3D[3*i+2] = cameraRot1[2]*p[0] + cameraRot1[5]*p[1] + cameraRot1[8]*p[2];
-
+					
+					printf("Point %d: %f\t %f\t %f\n",i,points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
 				}
 
 }
