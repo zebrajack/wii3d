@@ -9,7 +9,7 @@
 #define THRESHHOLD 20
 
 float points2D[16]; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
-                                  //*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
+//*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
 float points3D[12];
 
 float oldPoints3D[12]; //to take advantage of time coherence, when the case that more than one points are very close to the epipolar line.
@@ -30,6 +30,8 @@ int pairNumber2[4]; //second possible pair number.
 bool useTemporal = false;
 
 bool calibrated = false;
+
+bool
 
 void Calibration()
 {
@@ -79,7 +81,7 @@ void Calibration()
 	float p3[12];
 	for (int i = 0; i < 4; i++)
 	{
-		
+
 		if (l1 == i || l2 == i)
 			x = -6;
 		else
@@ -96,7 +98,7 @@ void Calibration()
 
 	//calibration
 	int count[] = {4};
-	
+
 	CvMat mP42D1 = cvMat(4,2,CV_32FC1,points2D);
 	CvMat mP43D1 = cvMat(4,3,CV_32FC1,p3);
 	CvMat mCount = cvMat(1,1,CV_32SC1,count);
@@ -168,7 +170,7 @@ void Calibration()
 	//assign 3d coordinates for the 4 points
 	for (int i = 0; i < 4; i++)
 	{
-		
+
 		if (l1 == i+4 || l2 == i+4)
 			x = -6;
 		else
@@ -196,7 +198,7 @@ void Calibration()
 
 	CvMat * rotMat2 = cvCreateMat(3,3,CV_32FC1);
 	cvRodrigues2( rotVec2, rotMat2);
-	
+
 	printf("Intrisic Matrix2 Got from 4 Points:\n");
 	for (int i=0; i<3; i++)
 	{
@@ -238,8 +240,8 @@ void Calibration()
 		}
 		printf("\n");
 	}
-	
-	
+
+
 	printf("R new between Camera2 and Camera1:\n");
 	for (int i=0; i<3; i++)
 	{
@@ -492,13 +494,21 @@ void Reconstruct3D()
 		points3D[3*i+2] = cameraRot1[2]*p[0] + cameraRot1[5]*p[1] + cameraRot1[8]*p[2];
 
 		//printf("Point%d2D = %f\t %f\n",i, points2D[2*i],points2D[2*i+1]);
-		printf("%f\t %f\t %f\n",points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
 	}
 	if (energy>THRESHHOLD)
 	{
 		printf("Exists unpaired points, Energy:%f\n.",energy);
 		//return;
 	}
+	SpatialCor(points3D);
+	for(int i = 0; i < 4; i++)
+	{
+		printf("%f\t %f\t %f\n",points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
+	}
+}
+
+void SpatialCor(float[] p3d)
+{
 
 }
 
