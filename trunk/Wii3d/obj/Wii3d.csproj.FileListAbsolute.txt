@@ -9,3 +9,14 @@ E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\Wii3d\obj\Debug\Wii3d.MainForm.
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\Wii3d\bin\Debug\WiimoteLib.dll
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\Wii3d\bin\Debug\WiimoteLib.pdb
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\Wii3d\bin\Debug\WiimoteLib.xml
+E:\research\wii3d\src\Wii3d\obj\Debug\Wii3d.exe
+E:\research\wii3d\src\Wii3d\obj\Debug\Wii3d.pdb
+E:\research\wii3d\src\Wii3d\bin\Debug\Wii3d.exe
+E:\research\wii3d\src\Wii3d\bin\Debug\Wii3d.pdb
+E:\research\wii3d\src\Wii3d\bin\Debug\WiimoteLib.dll
+E:\research\wii3d\src\Wii3d\bin\Debug\WiimoteLib.pdb
+E:\research\wii3d\src\Wii3d\bin\Debug\WiimoteLib.xml
+E:\research\wii3d\src\Wii3d\obj\Debug\ResolveAssemblyReference.cache
+E:\research\wii3d\src\Wii3d\obj\Debug\Wii3d.MainForm.resources
+E:\research\wii3d\src\Wii3d\obj\Debug\Wii3d.Properties.Resources.resources
+E:\research\wii3d\src\Wii3d\obj\Debug\Wii3d.csproj.GenerateResource.Cache

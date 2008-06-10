@@ -3,3 +3,9 @@ E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\WiimoteLib\bin\Debug\WiimoteLib
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\WiimoteLib\obj\Debug\ResolveAssemblyReference.cache
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\WiimoteLib\obj\Debug\WiimoteLib.dll
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\WiimoteLib\obj\Debug\WiimoteLib.pdb
+E:\research\wii3d\src\WiimoteLib\bin\Debug\WiimoteLib.XML
+E:\research\wii3d\src\WiimoteLib\bin\Debug\WiimoteLib.dll
+E:\research\wii3d\src\WiimoteLib\bin\Debug\WiimoteLib.pdb
+E:\research\wii3d\src\WiimoteLib\obj\Debug\ResolveAssemblyReference.cache
+E:\research\wii3d\src\WiimoteLib\obj\Debug\WiimoteLib.dll
+E:\research\wii3d\src\WiimoteLib\obj\Debug\WiimoteLib.pdb

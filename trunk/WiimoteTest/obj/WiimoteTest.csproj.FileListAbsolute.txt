@@ -9,3 +9,14 @@ E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTe
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.csproj.GenerateResource.Cache
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.exe
 E:\research\wii3d\WiiRemoteLib_1.2\src\WiimoteCS\WiimoteTest\obj\Debug\WiimoteTest.pdb
+E:\research\wii3d\src\WiimoteTest\bin\Debug\WiimoteTest.exe
+E:\research\wii3d\src\WiimoteTest\bin\Debug\WiimoteTest.pdb
+E:\research\wii3d\src\WiimoteTest\bin\Debug\WiimoteLib.dll
+E:\research\wii3d\src\WiimoteTest\bin\Debug\WiimoteLib.pdb
+E:\research\wii3d\src\WiimoteTest\bin\Debug\WiimoteLib.xml
+E:\research\wii3d\src\WiimoteTest\obj\Debug\ResolveAssemblyReference.cache
+E:\research\wii3d\src\WiimoteTest\obj\Debug\WiimoteTest.Form1.resources
+E:\research\wii3d\src\WiimoteTest\obj\Debug\WiimoteTest.Properties.Resources.resources
+E:\research\wii3d\src\WiimoteTest\obj\Debug\WiimoteTest.csproj.GenerateResource.Cache
+E:\research\wii3d\src\WiimoteTest\obj\Debug\WiimoteTest.exe
+E:\research\wii3d\src\WiimoteTest\obj\Debug\WiimoteTest.pdb
