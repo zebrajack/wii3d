@@ -25,7 +25,7 @@
 \begin{document}
 
 %%%%%%%%% TITLE
-\title{Low-cost Optical Tracking System using Wii Remote}
+\title{Low-cost 3D Tracking System using Wii Remote}
 
 \author{Wei Zhang, Yi Gong\\
 Department of Computer Science\\
@@ -202,28 +202,115 @@ the player's certain specific postures.
 
 %-------------------------------------------------------------------------
 \section{3D Reconstruction}
-The 3D reconstruction of our system can be devided into three steps: camera calibration, point pair matching and 3D position calculation. 
+The 3D reconstruction of our system can be 
+devided into three steps: camera calibration, 
+point pair matching and 3D position calculation. 
 \subsection{Camera Calibration}
-Although a lot of researchers have exploited the methods of multiple view stereo problem based on uncalibrated cameras, these methods need at least 7 marks, as fundamental matrix has 7 freedoms. Due to the 4-marks limitation of wii driver, we cannot apply enough marks to implement our system without camera calibration. Therefore, we take use of Zhang's calibration method implemented in OpenCV. At the first stage of our method, we will put a measured 12-inch-side-long square plane, with four infrared LEDs attached around its corners, in front of the two infrared cameras. For each camera, our application will analysis the location of the four 2D coordinates and bind them with correspond predefined 3D coordinates (-6,-6,0),(-6,6,0),(6,6,0),(6,-1,0) automatically. Then our application will do the calibration and get the rotation matrics $R_{1}$, $R_{2}$ together with translation matrix $t_{1}$, $t_{2}$. To easier our further work of essential matrix calculation and 3D reconstruction, we do a world transformation to make the transformation matrix of the first camera change from $( R1~ | ~t1 )$ to $( I~ | ~0 )$. It can be proved that the transformation matrix of the second camera will becomes 
-\equation{( R_{2} R_{1}^{-1}~ | ~t_{2} - R_{2} R_{1}^{-1} t_{1} )}\endequation after this world transformation. 
+Although a lot of researchers have exploited 
+the methods of multiple view stereo problem based
+ on uncalibrated cameras, these methods need at
+ least 7 marks, as fundamental matrix
+ has 7 freedoms. Due to the 4-marks limitation of
+ wii driver, we cannot apply enough marks to implement
+ our system without camera calibration. Therefore, we
+ take use of Zhang's calibration method by calling
+ the routine of OpenCV. At the first stage of our
+ method, we will put a measured square plane, with
+ four infrared LEDs attached around its corners, in
+ front of the two infrared cameras. For each camera, our
+ application will analysis the location of the four
+ 2D coordinates and bind them with correspond predefined
+ 3D coordinates automatically. Then it will do the
+ calibration and get the rotation matrics
+ $R_{1}$, $R_{2}$ and translation matrix $t_{1}$, $t_{2}$. 
+To easier our further work of essential 
+matrix calculation and 3D reconstruction, 
+we do a world transformation to make the 
+transformation matrix of the first camera 
+change from $( R1~ | ~t1 )$ to $( I~ | ~0 )$. 
+It can be proved that the transformation matrix 
+of the second camera will becomes 
+\equation{( R_{2} R_{1}^{-1}~ | ~t_{2} - R_{2} R_{1}^{-1} t_{1} )}\endequation 
+after this world transformation. 
 
 \subsection{Point Pair Matching}
-In the point pair matching stage, we take use of the epipolar geometry to find the one-to-one relationships between two groups of points from the two camera's view. This relationship is built based on the essential matrix $E$, which is similar to fundamental matrix but just applied to normalized image coordinates: \equation{x'_{n}~E~x_{n}=0}\endequation Here $x_{n}$ and $x'_{n}$ are normalized image coordinates of the same 3D points in view1 an view2. It is obvious that $x_{n}$ and $x'_{n}$ can be get by just applying the inverse instrinsic matrics of the cameras to their original coordinates $x_{o}, x'_{o}$: \equation{x_{n} = K_{1}^{-1}x_{o} ~~~and~~~ x'_{n} = K_{2}^{-1}x'_{o}}\endequation where $K_{1}$ and $K_{2}$ are the instrinsic matrix of the two cameras.
-The essentail matrix can be calcualted from the transform vector and rotation matrix between the two cameras: \equation{E = [t]_{\times}R}\endequation
-As we've mentioned in last subsection, the rotation matrix and translation vector between our two cameras are: \equation{R = R_{2} R_{1}^{-1}}\endequation \equation{t = t_{2} - R_{2} R_{1}^{-1} t_{1}}\endequation 
+In the point pair matching stage, we take use of the 
+epipolar geometry to find the one-to-one relationships 
+between two groups of points from the two camera's view. 
+This relationship is built based on the essential 
+matrix $E$, which is similar to fundamental matrix 
+but just applied to normalized image coordinates:
+ \equation{x'_{n}~E~x_{n}=0}\endequation 
+Here $x_{n}$ and $x'_{n}$ are normalized 
+image coordinates of the same 3D points in view1 an 
+view2. It is obvious that $x_{n}$ and $x'_{n}$ 
+can be get by just applying the inverse 
+instrinsic matrics of the cameras to their 
+original coordinates $x_{o}, x'_{o}$: \equation{x_{n} 
+= K_{1}^{-1}x_{o} ~~~and~~~ x'_{n} = K_{2}^{-1}x'_{o}}\endequation 
+where $K_{1}$ and $K_{2}$ are the instrinsic 
+matrix of the two cameras.
+The essentail matrix can be calcualted from the 
+transform vector and rotation matrix between 
+the two cameras: \equation{E = [t]_{\times}R}\endequation
+As we've mentioned in last subsection, 
+the rotation matrix and translation vector 
+between our two cameras are: 
+\equation{R = R_{2} R_{1}^{-1}}\endequation 
+\equation{t = t_{2} - R_{2} R_{1}^{-1} t_{1}}\endequation 
 
-Getting the essential matrix, Equation 2 tell us the property of correspondant point pairs. Actually, recally that \equation{l' = Ex_{n}}\endequation we can see the geometry meaning of Equation 2: $x_{n}$ 's correspondant point $x'_{n}$ should lie on the the epipolar line $l'$ in the second view. 
-However, such requirement can only be meet in ideal situation. Noises and errors brought in the whole process make this property unreliable. In such cases, the problem becomes a optimal solution search based on energy minimization. The energy here is defined as a function of distance from the 2D point to its pair's epipolar line: \equation{d(x,l')^2+d(x',l)^2}  \endequation We try all possible point pairs and keep the one that minimizes the energy.
+Getting the essential matrix, Equation 2 tell us 
+the property of correspondant point pairs. 
+Actually, recally that \equation{l' = Ex_{n}}\endequation 
+we can see the geometry meaning of Equation 2: $x_{n}$ 's 
+correspondant point $x'_{n}$ should lie on the 
+the epipolar line $l'$ in the second view. 
+However, such requirement can only be meet in 
+ideal situation. Noises and errors brought in the 
+whole process make this property unreliable. 
+In such cases, the problem becomes a optimal 
+solution search based on energy minimization. 
+The energy here is defined as a function of distance 
+from the 2D point to its pair's epipolar line: 
+\equation{d(x,l')^2+d(x',l)^2}  \endequation 
+We try all possible point pairs and 
+keep the one that minimizes the energy.
 
 \subsection{3D Coordinates Calculation}
-To calculate the 3D position of $x$ and $x'$, we use the inhomogenous linear triangulation method\cite{multipleview}. Knowing that $x = PX$ and $x' = P'X$, where $P$ and $P'$ are the projection matrix of camera1 and camera2, we can apply the factor that $x\times(PX) = 0$ and $x'\times(PX) = 0$. Each of them will give us three linear equations with dependency that allows us to elimiate one. Finally, it will give us four linear equations together. If we reorginanize the coefficients and variables, we can get the linear equations in the form of $AX = 0$, where $A$:
+To calculate the 3D position of $x$ and $x'$, we use the inhomogenous linear triangulation method\cite{Hartley03}. Knowing that $x = PX$ and $x' = P'X$, where $P$ and $P'$ are the projection matrix of camera1 and camera2, we can apply the factor that $x\times(PX) = 0$ and $x'\times(PX) = 0$. Each of them will give us three linear equations with dependency that allows us to elimiate one. Finally, it will give us four linear equations together. If we reorginanize the coefficients and variables, we can get the linear equations in the form of $AX = 0$, where $A$:
 \equation{A = \left [ \begin{array}{c} xp^{3T} - p^{1T} \\ yp^{3T} - p^{2T} \\x'p'^{3T} - p^{1T} \\ y'p'^{3T} - p^{2T}\end{array} \right ] }\endequation
-$p^{iT}$ here represents the $i$th row of P and similarly $p'^{iT}$. Replace the X with $(X,Y,Z,1)^{T}$, we can derive this $4\times4$ homogenous system to a $4\times3$ inhomogenous one. The right hand side vector $b$ will just be the negative fourth column of original $A$ matrix. This inhomogenous can be solved by many mature factorization method, like SVD or QR decomposition, which will gives the least square solution if $b$ is not in the range space of $A$. This solution gives us the 3D coordinates of the 2D point pair $x$ and $x'$. Since we did a world transformation to facilitate essentail matrix calculation before, here we will do an inverse transformation to go back to the world coordinates defined by the predifined 3D coordinates of calibration board. The inverse transformation can be done by simply applying the original transformation matrix of camera1, i.e. $(R_{1}~|~T_{1})$.
+$p^{iT}$ here represents the $i$th row of P and similarly $p'^{iT}$. Replace the X with $(X,Y,Z,1)^{T}$, we can derive this $4\times4$ homogenous system to a $4\times3$ inhomogenous one. The right hand side vector $b$ will just be the negative fourth column of original $A$ matrix. This inhomogenous can be solved by many mature factorization method, like SVD or QR decomposition, which will gives the least square solution if $b$ is not in the range space of $A$. This solution gives us the 3D coordinates of the 2D point pair $x$ and $x'$
 
-\section{Experiments and Discussion}
-We apply several types of experiments to check the efficiency of our method. In each experiments, we put the two cameras in front of the test scene, with 40 inch distance and about 45 degrees angle from each other. We will do the camera calibration first and set the center of calibration board as the origin of world coordinate system, the board plane as the xy plane, the normal direction of board as z axis. The test area is in the range of 25 inch to 75 inch from the two cameras in z direcion and about 60 degree view angle of the cameras.
+\section{Experiments}
+We performed several types of experiments to 
+check the effectiveness of our method. 
+In each experiments, we put the two cameras 
+in front of the test scene, with 40 inches distance 
+and about 45 degrees angle from each other. 
+We will do the camera calibration first and set 
+the center of calibration board as the origin of 
+world coordinate system, the board plane as the $xy$ 
+plane, the normal direction of board as z axis. 
+The test area is in the range of 25 inches to 75 
+inches from the two cameras in z direcion and 
+about 60 degree view angle of the cameras.
 \begin{itemize}
-\item 3D reconstruction error estimation. Due to the difficulty and inaccuracy of physical measurement, such as the calibration board orientation, the 3D distance to its center etc, we cannot get the 3D coordinates of every position in our test scene very precisely. The only exactly known 3D position is the four predefined 3D coordinates of calibration board. Thus, after doing camera calibration, we apply the point pair matching and 3D reconstruction on the 2D coordinates of the calibration LEDs to check whether we can get the correct 3D coordinates by only sending the eight 2D coordinates in two camera views. The results are satisfactory. The point pair matching works correctly and the whole remapping process brings error smaller than $10^{-5}$ inch for x, y, and z. We've done several time of such tests, the data showed below is one of the average cases.
+\item 3D reconstruction error estimation. 
+Due to the difficulty and inaccuracy of physical measurement, 
+such as the calibration board orientation, the 3D distance 
+to its center etc., we cannot get the physical 3D coordinates 
+of every position in our test scene very precisely. 
+The only exactly known 3D position is the four predefined 
+3D coordinates of calibration board. Thus, after finishing 
+the camera calibration, we apply the point pair matching 
+and 3D reconstruction on the 2D coordinates of the 
+calibration LEDs to check whether we can get the correct 
+3D coordinates by only sending the eight 2D coordinates 
+in two camera views. The results are satisfactory. 
+The point pair matching works correctly and the whole 
+remapping process brings error smaller than 
+$10^{-5}$ inches for x, y, and z. We've repeated the same tests
+several times, the data showed below is one of the average cases.
 \begin{table}[ht]
 \caption{Recovered 3D coordinates of calibration board}
 \centering
@@ -231,10 +318,10 @@ We apply several types of experiments to check the efficiency of our method. In 
 \hline\hline
 Position & x & y & z\\[0.5ex]
 \hline
-Upper Left & -6.000001	& 5.999997	& -0.000006 \\
-Lower Left &-6.000000	& -6.000000	& -0.000005\\
-Upper Right & 6.000002	& 6.000003	& 0.000007\\
-Lower Right & 6.000002	& -5.999998	& 0.000006 \\[1ex]
+Upper Left & -6.000001& 5.999997& -0.000006 \\
+Lower Left &-6.000000& -6.000000& -0.000005\\
+Upper Right & 6.000002& 6.000003& 0.000007\\
+Lower Right & 6.000002& -5.999998& 0.000006 \\[1ex]
 \hline
 \end{tabular}
 \end{table}
@@ -259,9 +346,13 @@ side1 & side2 & side3 &side4\\[0.5ex]
 \end{tabular}
 \end{table}
 
-
-
-\item Moving along a straight line. We move the calibration board along the x axis. The reconstructed 3D coordinates are plot in the matlab as follow. Since the movement are done manually without any tools, the trace of these two movement jagged a little. But still you can see the same clear path of 4 LEDs and the y coordinates of the 4 LEDs almost keeps unchanged. 
+\item Moving along a straight line. We move the 
+calibration board along the x axis. 
+The reconstructed 3D coordinates are plot as follow. 
+Since the movement are done manually without adequate 
+alignment adjustment, the trace of these two movement 
+jagged a little. But still we can see the same clear 
+path of 4 LEDs and the y coordinates of the 4 LEDs almost keep unchanged. 
 \begin{figure}
 \centering
 \includegraphics[width=7.5cm]{xmove.eps}
@@ -269,15 +360,19 @@ side1 & side2 & side3 &side4\\[0.5ex]
 \label{xmove}
 \end{figure}
 
-\item Moving along a random straight line. Similar to the movement along x axis. 
+\item This time we try to move along the depth($z$) direction. Notice that 
+the depth value is estimated by the triangulation, this experiment essentially
+ shows the effectiveness of our algorithm. The raw measurement of physical 
+movement matches the calculated result pretty well.
+
 \begin{figure}[hb]
 \centering
 \includegraphics[width=7.5cm]{straightMove.eps}
-\caption{Movement along a random straight line}
+\caption{Movement along the depth direction}
 \label{straight}
 \end{figure}
 
-\item "Jump". Note that in this case, few error points occur. We repeat this experiment and find that these error are caused by LED signal missing during the movement. In our implementation, when some LEDs are not visible, we will take use the previous data of this LED. However, if the LED becomes invisible in one view for a long time and can be visible in another view, than the point pair matching may not works correctly as the previous data can be to old to generate a small energy when is calculating the distance to the correspondant epipolar line. It may leads to a chain effect to mistake other points' pair matching. The non-symmetric availablity of data in two cameras are one unsovled issue in our method. We leave this problem for our future work.
+\item ``Jump''. Note that in this case, few error points occur. We repeat this experiment and find that these error are caused by LED signal missing during the movement. In our implementation, when some LEDs are not visible, we will take use the previous data of this LED. However, if the LED becomes invisible in one view for a long time and can be visible in another view, than the point pair matching may not works correctly as the previous data can be to old to generate a small energy when is calculating the distance to the correspondant epipolar line. It may leads to a chain effect to mistake other points' pair matching. The non-symmetric availablity of data in two cameras are one unsovled issue in our method. We leave this problem for our future work.
 
 \begin{figure}
 \centering
@@ -289,7 +384,34 @@ side1 & side2 & side3 &side4\\[0.5ex]
 
 %-------------------------------------------------------------------------
 \section{Conclusion}
+We have presented a 3D tracking system using Wii remote.
+It uses multiple view geometry algorithms for computer vision
+to corelate two Wii remotes, thus extends their tracking capability
+from 2D to 3D space. This system features a low-cost solution for developing 
+new interactive applications base on existing very popular Wii remote hardware. 
 
+Since the position of cameras can not be fixed, 
+this paper used a simple method to calibrate the cameras which only need a square
+board with 4 points. Based on that the spatial correspondency are computed
+by find the minium value of cost function for all the mappings. Then 
+inhomogenous linear triangulation is used to reconstruct the objects' 3D 
+coordinates.
+experiment results showed the effectiveness of our calibration
+solution.
+
+There are still many problems remain in the future works. 
+First and most important is that we need to improve the robustness of our 
+spatial correspondency algorithm. During the experiment we found that it 
+didn't perform well when some markers are only visible from one view,
+then an optimal solution for minimizing the cost function actually doesn't exist.
+One possible way to solve this is to add a Kalman filter layer before the spatial 
+correspondency processing, so that the image position of objects can be estimated
+even they are temporarily invisible. Another problem is that the visible angle
+of our IR markers is too narrow, so a stronger IR marker is needed 
+for some applications such as motion capture. Finally, the tracking 
+capability of Wii remote is natively resticted to only 4 objects, we are 
+looking forward to see more powerful computer vision and human-computer
+interaction technologies come into daily life in future.
 
 {\small
 \bibliography{egbib}
