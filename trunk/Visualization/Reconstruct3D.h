@@ -5,6 +5,7 @@
 #include <math.h>
 #include <cv.h>
 #include "linear/jama_qr.h"
+
 float points2D[16]; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
                                   //*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
 float points3D[12];
@@ -73,13 +74,13 @@ void Calibration()
 	{
 		
 		if (l1 == i || l2 == i)
-			x = -1;
+			x = -6;
 		else
-			x = 1;
+			x = 6;
 		if (d1 == i || d2 == i)
-			y = -1;
+			y = -6;
 		else
-			y = 1;
+			y = 6;
 
 		p3[3*i] = x;
 		p3[3*i+1] = y;
@@ -159,13 +160,13 @@ void Calibration()
 	{
 		
 		if (l1 == i+4 || l2 == i+4)
-			x = -1;
+			x = -6;
 		else
-			x = 1;
+			x = 6;
 		if (d1 == i+4 || d2 == i+4)
-			y = -1;
+			y = -6;
 		else
-			y = 1;
+			y = 6;
 
 		p3[3*i] = x;
 		p3[3*i+1] = y;
@@ -195,10 +196,6 @@ void Calibration()
 		}
 		printf("\n");
 	}
-	
-
-		
-
 
 	// R = R2*inv(R1), to make the camera1 's rotation matrix as identity
 	cameraRot[0] = rotMat1->data.fl[0] * rotMat2->data.fl[0] + rotMat1->data.fl[1] * rotMat2->data.fl[1] + rotMat1->data.fl[2] * rotMat2->data.fl[2];
@@ -480,7 +477,8 @@ void Reconstruct3D()
 					points3D[3*i+1] = cameraRot1[1]*p[0] + cameraRot1[4]*p[1] + cameraRot1[7]*p[2];
 					points3D[3*i+2] = cameraRot1[2]*p[0] + cameraRot1[5]*p[1] + cameraRot1[8]*p[2];
 					
-					printf("Point %d: %f\t %f\t %f\n",i,points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
+					printf("Point%d2D = %f\t %f\n",i, points2D[2*i],points2D[2*i+1]);
+					printf("Point%d3D = %f\t %f\t %f\n",i,points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
 				}
 
 }
