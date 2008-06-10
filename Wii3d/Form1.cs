@@ -21,6 +21,7 @@ namespace Wii3d
         Graphics g1;
         Bitmap b2 = new Bitmap(256, 192, PixelFormat.Format24bppRgb);
         Graphics g2;
+        System.Timers.Timer t = new System.Timers.Timer(100);
 
         const int MAX_CLIENTS = 10;
         const int port = 6464;
@@ -47,7 +48,7 @@ namespace Wii3d
             wm2.Connect(1); // skip the first device
             wm2.SetReportType(Wiimote.InputReport.IRAccel, true);
             wm2.SetLEDs(false, true, true, false);
-            
+
             g1 = Graphics.FromImage(b1);
             g2 = Graphics.FromImage(b2);
 
@@ -64,10 +65,14 @@ namespace Wii3d
                 // Create the call back for any client connections...
                 _mainSocket.BeginAccept(new AsyncCallback(OnClientConnect), null);
             }
-   			catch(SocketException se)
-			{
-				MessageBox.Show ( se.Message );
-			}
+            catch (SocketException se)
+            {
+                MessageBox.Show(se.Message);
+            }
+
+            t.Elapsed += new System.Timers.ElapsedEventHandler(SendPacket);
+            t.AutoReset = true;
+            t.Start();
         }
 
         private void wm_WiimoteChanged1(object sender, WiimoteChangedEventArgs args)
@@ -151,7 +156,7 @@ namespace Wii3d
             if (ws.IRState.Found4)
                 g1.DrawEllipse(new Pen(Color.Orange), (int)(ws.IRState.RawX4 / 4), (int)(ws.IRState.RawY4 / 4), ws.IRState.Size4 + 1, ws.IRState.Size4 + 1);
             //if (ws.IRState.Found1 && ws.IRState.Found2)
-                //g1.DrawEllipse(new Pen(Color.Green), (int)(ws.IRState.RawMidX / 4), (int)(ws.IRState.RawMidY / 4), 2, 2);
+            //g1.DrawEllipse(new Pen(Color.Green), (int)(ws.IRState.RawMidX / 4), (int)(ws.IRState.RawMidY / 4), 2, 2);
             pbIR1.Image = b1;
 
             CreatePacket(1, ws.IRState, _packet1);
@@ -228,7 +233,7 @@ namespace Wii3d
             if (ws.IRState.Found4)
                 g2.DrawEllipse(new Pen(Color.Orange), (int)(ws.IRState.RawX4 / 4), (int)(ws.IRState.RawY4 / 4), ws.IRState.Size4 + 1, ws.IRState.Size4 + 1);
             //if (ws.IRState.Found1 && ws.IRState.Found2)
-                //g2.DrawEllipse(new Pen(Color.Green), (int)(ws.IRState.RawMidX / 4), (int)(ws.IRState.RawMidY / 4), 2, 2);
+            //g2.DrawEllipse(new Pen(Color.Green), (int)(ws.IRState.RawMidX / 4), (int)(ws.IRState.RawMidY / 4), 2, 2);
             pbIR2.Image = b2;
 
             CreatePacket(2, ws.IRState, _packet2);
@@ -261,43 +266,45 @@ namespace Wii3d
 
         private void CreatePacket(byte camID, IRState state, byte[] buff)
         {
-            int current = 0;
-            byte[] tmp = System.BitConverter.GetBytes(camID);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.Found1);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.RawX1);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.RawY1);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.Size1);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.Found2);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.RawX2);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.RawY2);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.Size2);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.Found3);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.RawX3);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.RawY3);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.Size3);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.Found4);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.RawX4);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.RawY4);
-            CopyData(buff, tmp, ref current);
-            tmp = System.BitConverter.GetBytes(state.Size4);
-            
-            CopyData(buff, tmp, ref current);
-            SendPacket(buff);
+            lock (this)
+            {
+                int current = 0;
+                byte[] tmp = System.BitConverter.GetBytes(camID);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.Found1);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.RawX1);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.RawY1);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.Size1);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.Found2);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.RawX2);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.RawY2);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.Size2);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.Found3);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.RawX3);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.RawY3);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.Size3);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.Found4);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.RawX4);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.RawY4);
+                CopyData(buff, tmp, ref current);
+                tmp = System.BitConverter.GetBytes(state.Size4);
+                CopyData(buff, tmp, ref current);
+            }
+            //SendPacket(buff);
         }
 
         private void CopyData(byte[] dest, byte[] source, ref int pos)
@@ -309,7 +316,7 @@ namespace Wii3d
             }
         }
 
-        private void SendPacket(byte[] buff)
+        private void SendPacket(object source, System.Timers.ElapsedEventArgs e)
         {
             try
             {
@@ -319,7 +326,11 @@ namespace Wii3d
                     {
                         if (_workerSocket[i].Connected)
                         {
-                            _workerSocket[i].Send(buff);
+                            lock (this)
+                            {
+                                _workerSocket[i].Send(_packet1);
+                                _workerSocket[i].Send(_packet2);
+                            }
                         }
                     }
                 }
