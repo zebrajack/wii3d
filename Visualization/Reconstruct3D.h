@@ -12,6 +12,8 @@ float points3D[12];
 // Extrinsic parameters of cameras
 float cameraRot[9]; //rotation matrix from camera2 to camera1
 float cameraTrans[3]; //translation from camera2 to camera1
+float cameraTrans1[3] ;//translation of first camera, will be used to transform world coordinate back
+float cameraRot1[9]; //rotation of first camera
 
 // Intrisic parameters of cameras
 float K1[9], K2[9];
@@ -194,19 +196,9 @@ void Calibration()
 		printf("\n");
 	}
 	
-	printf("Rotation Vector 1 Got from 4 Points:\n");
-	for (int i = 0; i<3; i++)
-	{
-		printf("%f\t",rotVec1->data.fl[i]);
-	}
-	printf("\n");
 
-	printf("Rotation Vector 2 Got from 4 Points:\n");
-	for (int i = 0; i<3; i++)
-	{
-		printf("%f\t",rotVec2->data.fl[i]);
-	}
-	printf("\n");
+		
+
 
 	// R = R2*inv(R1), to make the camera1 's rotation matrix as identity
 	cameraRot[0] = rotMat1->data.fl[0] * rotMat2->data.fl[0] + rotMat1->data.fl[1] * rotMat2->data.fl[1] + rotMat1->data.fl[2] * rotMat2->data.fl[2];
@@ -224,12 +216,13 @@ void Calibration()
 	{
 		for (int j =0; j<3; j++)
 		{
+			cameraRot1[i*3+j] = rotMat1->data.fl[i*3+j];
 			printf("%f\t", rotMat1->data.fl[i*3+j]);
 		}
 		printf("\n");
 	}
 
-	printf("R1:\n");
+	printf("R2:\n");
 	for (int i=0; i<3; i++)
 	{
 		for (int j =0; j<3; j++)
@@ -253,6 +246,7 @@ void Calibration()
 	printf("T1:\n");	
 	for (int i = 0; i<3; i++)
 	{
+		cameraTrans1[i] = transVec1->data.fl[i];
 		printf("%f\t",transVec1->data.fl[i]);
 	}
 	printf("\n");
@@ -374,8 +368,11 @@ void Reconstruct3D()
 	float energy = 99999.0f;
 
 	for (int i=4; i<8; i++)
+	{
 		for (int j = 4; j<8; j++)
+		{
 			for (int k = 4; k < 8; k++)
+			{
 				for (int l = 4; l < 8; l++)
 				{
 					if (i == j || j == k || k == l || i == k || j == l || i == l)
@@ -400,62 +397,88 @@ void Reconstruct3D()
 						pairNumber[3] = l;
 					}
 				}
+			}
+		}
+	}
 
-
-				float  A[16];
-				float  AT[16];
-				float  ATA[16];
+				float  A[12];
 
 				float  B[4];
-				float  X[4];
-				for (int i = 0; i<4; i++)
-					B[i] = 0;
+				float  X[3];
 
-				TNT::Array1D<float> TNT_B = TNT::Array1D<float>(4,B);
-				TNT::Array1D<float> TNT_X = TNT::Array1D<float>(4);
+				TNT::Array1D<float> TNT_X = TNT::Array1D<float>(3);
 
 				//compute the 3D position according to the points position
-				//solve the least square solution of x * (PX) =0
+				//solve the least square solution of x cross* (PX) =0
 				//Reference: Multiple View Geometry in Computer Vision: p312
 
 				for (int i = 0; i<4; i++)
 				{
 
+					//A[0] = -1;
+					//A[1] = 0;
+					//A[2] = normalizedPoints2D[2*i];
+					//A[3] = 0;
+
+					//A[4] = 0;
+					//A[5] = -1;
+					//A[6] = normalizedPoints2D[2 * i+1];
+					//A[7] = 0;
+
+					//A[8] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[6]-cameraRot[0];
+					//A[9] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[7]-cameraRot[1];
+					//A[10] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[8]-cameraRot[2];
+					//A[11] = normalizedPoints2D[2 * pairNumber[i]]*cameraTrans[2] - cameraTrans[0];
+
+					//A[12] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[6]-cameraRot[3];
+					//A[13] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[7]-cameraRot[4];
+					//A[14] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[8]-cameraRot[5];
+					//A[15] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraTrans[2] - cameraTrans[1];
+
 					A[0] = -1;
 					A[1] = 0;
 					A[2] = normalizedPoints2D[2*i];
+
 					A[3] = 0;
+					A[4] = -1;
+					A[5] = normalizedPoints2D[2 * i+1];
 
-					A[4] = 0;
-					A[5] = -1;
-					A[6] = normalizedPoints2D[2 * i+1];
-					A[7] = 0;
+					A[6] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[6]-cameraRot[0];
+					A[7] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[7]-cameraRot[1];
+					A[8] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[8]-cameraRot[2];
+					
 
-					A[8] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[6]-cameraRot[0];
-					A[9] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[7]-cameraRot[1];
-					A[10] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[8]-cameraRot[2];
-					A[11] = normalizedPoints2D[2 * pairNumber[i]]*cameraTrans[2] - cameraTrans[0];
+					A[9] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[6]-cameraRot[3];
+					A[10] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[7]-cameraRot[4];
+					A[11] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[8]-cameraRot[5];
 
-					A[12] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[6]-cameraRot[3];
-					A[13] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[7]-cameraRot[4];
-					A[14] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[8]-cameraRot[5];
-					A[15] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraTrans[2] - cameraTrans[1];
+					B[0] = 0;
+					B[1] = 0;
+					B[2] = -normalizedPoints2D[2 * pairNumber[i]]*cameraTrans[2] + cameraTrans[0];
+					B[3] = -normalizedPoints2D[2 * pairNumber[i]+1]*cameraTrans[2] + cameraTrans[1];
 
 
-					MatrixTranspose4(A,AT);
-					MatrixMulMatrix4x4(AT,A,ATA);
-
-					TNT::Array2D<float> TNT_A = TNT::Array2D<float>(4,4,A);
+					TNT::Array2D<float> TNT_A = TNT::Array2D<float>(4,3,A);
+					TNT::Array1D<float> TNT_B = TNT::Array1D<float>(4,B);
 
 					JAMA::QR<float> JAMA_QR = JAMA::QR<float>(TNT_A);
 					TNT_X = JAMA_QR.solve(TNT_B);
 
+					float p[3];
+
 					if (TNT_X.dim()!=0)
 					{
-						points3D[i * 3] =  TNT_X[0]/TNT_X[3];
-						points3D[i * 3 + 1] = TNT_X[1]/TNT_X[3];
-						points3D[i * 3 + 2] = TNT_X[2]/TNT_X[3];
+						p[0] =  TNT_X[0];
+						p[1] = TNT_X[1];
+						p[2] = TNT_X[2];
 					}
+
+					for (int j = 0; j<3; j++)
+						p[j] -=cameraTrans1[j];
+					
+					points3D[3*i] = cameraRot1[0]*p[0] + cameraRot1[3]*p[1] + cameraRot1[6]*p[2];
+					points3D[3*i+1] = cameraRot1[1]*p[0] + cameraRot1[4]*p[1] + cameraRot1[7]*p[2];
+					points3D[3*i+2] = cameraRot1[2]*p[0] + cameraRot1[5]*p[1] + cameraRot1[8]*p[2];
 
 				}
 
