@@ -1,0 +1,53 @@
+\begin{thebibliography}{1}\itemsep=-1pt
+
+\bibitem{Faugeras92}
+O.~D. Faugeras.
+\newblock What can be seen in three dimensions with an uncalibrated stereo rig.
+\newblock In {\em ECCV '92: Proceedings of the Second European Conference on
+  Computer Vision}, pages 563--578, London, UK, 1992. Springer-Verlag.
+
+\bibitem{Hartley03}
+R.~Hartley and A.~Zisserman.
+\newblock {\em Multiple View Geometry in Computer Vision}.
+\newblock Cambridge University Press, New York, NY, USA, 2003.
+
+\bibitem{Hartley95}
+R.~I. Hartley.
+\newblock In defence of the 8-point algorithm.
+\newblock In {\em ICCV '95: Proceedings of the Fifth International Conference
+  on Computer Vision}, page 1064, Washington, DC, USA, 1995. IEEE Computer
+  Society.
+
+\bibitem{JohnnyVR}
+J.~C. Lee.
+\newblock Head tracking for desktop vr displays using the wii remote.
+\newblock Http://www.cs.cmu.edu/~johnny/projects/wii/.
+
+\bibitem{JohnnyTouch}
+J.~C. Lee.
+\newblock Low-cost multi-point interactive whiteboards using the wiimote.
+\newblock Http://www.cs.cmu.edu/~johnny/projects/wii/.
+
+\bibitem{Higgins87}
+H.~C. Longuet-Higgins.
+\newblock A computer algorithm for reconstructing a scene from two projections.
+\newblock pages 61--62, 1987.
+
+\bibitem{luong95}
+Q.~Luong and O.~Faugeras.
+\newblock The fundamental matrix: Theory, algorithms, and stability analysis,
+  1995.
+
+\bibitem{Zhang00}
+Z.~Zhang.
+\newblock A flexible new technique for camera calibration.
+\newblock {\em IEEE Trans. Pattern Anal. Mach. Intell.}, 22(11):1330--1334,
+  2000.
+
+\bibitem{Zhang95}
+Z.~Zhang, R.~Deriche, O.~D. Faugeras, and Q.-T. Luong.
+\newblock A robust technique for matching two uncalibrated images through the
+  recovery of the unknown epipolar geometry.
+\newblock {\em Artificial Intelligence}, 78(1-2):87--119, 1995.
+
+\end{thebibliography}
