@@ -6,9 +6,13 @@
 #include <cv.h>
 #include "linear/jama_qr.h"
 
+#define THRESHHOLD 20
+
 float points2D[16]; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
                                   //*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
 float points3D[12];
+
+float oldPoints3D[12]; //to take advantage of time coherence, when the case that more than one points are very close to the epipolar line.
 
 // Extrinsic parameters of cameras
 float cameraRot[9]; //rotation matrix from camera2 to camera1
@@ -21,6 +25,9 @@ float K1[9], K2[9];
 
 //int valid3DPointNumber; //if some points has become invisible for a long time, it can not be calculated.
 int pairNumber[4]; //p0 in camera1 is corresponds to p0 in camera2
+int pairNumber2[4]; //second possible pair number.
+
+bool useTemporal = false;
 
 bool calibrated = false;
 
@@ -104,6 +111,9 @@ void Calibration()
 
 	CvMat * rotMat1 = cvCreateMat(3,3,CV_32FC1);
 	cvRodrigues2( rotVec1, rotMat1);
+
+	for (int i=0; i<4; i++)
+		printf("Point2D%d = %f\t %f\n",i,points2D[2*i],points2D[2*i]+1);
 
 	printf("Intrisic Matrix1 Got from 4 Points:\n");
 	for (int i=0; i<3; i++)
@@ -353,12 +363,17 @@ void Reconstruct3D()
 
 	//epipolar line: E*x
 	float eLine[12]; //4 epipolar lines mapped from 4 2D Points in the first camera to second camera
+	float eLine2[12]; //4 epipolar lines mapped from 4 2D Points in the second camera to first camera
 
 	for (int i=0; i < 4; i++)
 	{
 		eLine[3 * i] = eMatrix[0] * normalizedPoints2D[2 * i] + eMatrix[1] * normalizedPoints2D[2 * i + 1] + eMatrix[2];
 		eLine[3 * i + 1] = eMatrix[3] * normalizedPoints2D[2 * i] + eMatrix[4] * normalizedPoints2D[2 * i + 1] + eMatrix[5];
 		eLine[3 * i + 2] = eMatrix[6] * normalizedPoints2D[2 * i] + eMatrix[7] * normalizedPoints2D[2 * i + 1] + eMatrix[8];
+
+		eLine2[3 * i] = eMatrix[0] * normalizedPoints2D[2 * i+8] + eMatrix[1] * normalizedPoints2D[2 * i + 9] + eMatrix[2];
+		eLine2[3 * i + 1] = eMatrix[3] * normalizedPoints2D[2 * i+8] + eMatrix[4] * normalizedPoints2D[2 * i + 9] + eMatrix[5];
+		eLine2[3 * i + 2] = eMatrix[6] * normalizedPoints2D[2 * i+8] + eMatrix[7] * normalizedPoints2D[2 * i + 9] + eMatrix[8];
 	}
 
 	//calculate all pair combination and find the smallest engergy of x2'*E*x1 = 0
@@ -378,13 +393,23 @@ void Reconstruct3D()
 					float tEnergy = 0;
 					float e;
 					e = normalizedPoints2D[2 * i] * eLine[0] + normalizedPoints2D[2 * i + 1] * eLine[1] + eLine[2];
-					tEnergy += e>0?e:-e;
+					tEnergy += abs(e);
 					e = normalizedPoints2D[2 * j] * eLine[3] + normalizedPoints2D[2 * j + 1] * eLine[4] + eLine[5];
-					tEnergy += e>0?e:-e;
+					tEnergy += abs(e);
 					e = normalizedPoints2D[2 * k] * eLine[6] + normalizedPoints2D[2 * k + 1] * eLine[7] + eLine[8];
-					tEnergy += e>0?e:-e;
+					tEnergy += abs(e);
 					e = normalizedPoints2D[2 * l] * eLine[9] + normalizedPoints2D[2 * l + 1] * eLine[10] + eLine[11];
-					tEnergy += e>0?e:-e;
+					tEnergy += abs(e);
+
+					e = normalizedPoints2D[0] * eLine2[(i-4)*3] + normalizedPoints2D[1] * eLine2[(i-4)*3+1] + eLine2[(i-4)*3+2];
+					tEnergy += abs(e);
+					e = normalizedPoints2D[2] * eLine2[(j-4)*3] + normalizedPoints2D[3] * eLine2[(j-4)*3+1] + eLine2[(j-4)*3+2];
+					tEnergy += abs(e);
+					e = normalizedPoints2D[4] * eLine2[(k-4)*3] + normalizedPoints2D[5] * eLine2[(k-4)*3+1] + eLine2[(k-4)*3+2];
+					tEnergy += abs(e);
+					e = normalizedPoints2D[6] * eLine2[(l-4)*3] + normalizedPoints2D[7] * eLine2[(l-4)*3+1] + eLine2[(l-4)*3+2];
+					tEnergy += abs(e);
+
 					if (tEnergy < energy)
 					{
 						energy = tEnergy;
@@ -398,88 +423,82 @@ void Reconstruct3D()
 		}
 	}
 
-				float  A[12];
+	if (energy>THRESHHOLD)
+	{
+		return;
+	}
 
-				float  B[4];
-				float  X[3];
+	float  A[12];
 
-				TNT::Array1D<float> TNT_X = TNT::Array1D<float>(3);
+	float  B[4];
+	float  X[3];
 
-				//compute the 3D position according to the points position
-				//solve the least square solution of x cross* (PX) =0
-				//Reference: Multiple View Geometry in Computer Vision: p312
+	TNT::Array1D<float> TNT_X = TNT::Array1D<float>(3);
 
-				for (int i = 0; i<4; i++)
-				{
+	//compute the 3D position according to the points position
+	//solve the least square solution of x cross* (PX) =0
+	//Reference: Multiple View Geometry in Computer Vision: p312
 
-					//A[0] = -1;
-					//A[1] = 0;
-					//A[2] = normalizedPoints2D[2*i];
-					//A[3] = 0;
+	for (int i = 0; i<4; i++)
+	{
 
-					//A[4] = 0;
-					//A[5] = -1;
-					//A[6] = normalizedPoints2D[2 * i+1];
-					//A[7] = 0;
+		A[0] = -1;
+		A[1] = 0;
+		A[2] = normalizedPoints2D[2*i];
 
-					//A[8] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[6]-cameraRot[0];
-					//A[9] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[7]-cameraRot[1];
-					//A[10] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[8]-cameraRot[2];
-					//A[11] = normalizedPoints2D[2 * pairNumber[i]]*cameraTrans[2] - cameraTrans[0];
+		A[3] = 0;
+		A[4] = -1;
+		A[5] = normalizedPoints2D[2 * i+1];
 
-					//A[12] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[6]-cameraRot[3];
-					//A[13] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[7]-cameraRot[4];
-					//A[14] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[8]-cameraRot[5];
-					//A[15] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraTrans[2] - cameraTrans[1];
-
-					A[0] = -1;
-					A[1] = 0;
-					A[2] = normalizedPoints2D[2*i];
-
-					A[3] = 0;
-					A[4] = -1;
-					A[5] = normalizedPoints2D[2 * i+1];
-
-					A[6] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[6]-cameraRot[0];
-					A[7] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[7]-cameraRot[1];
-					A[8] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[8]-cameraRot[2];
-					
-
-					A[9] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[6]-cameraRot[3];
-					A[10] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[7]-cameraRot[4];
-					A[11] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[8]-cameraRot[5];
-
-					B[0] = 0;
-					B[1] = 0;
-					B[2] = -normalizedPoints2D[2 * pairNumber[i]]*cameraTrans[2] + cameraTrans[0];
-					B[3] = -normalizedPoints2D[2 * pairNumber[i]+1]*cameraTrans[2] + cameraTrans[1];
+		A[6] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[6]-cameraRot[0];
+		A[7] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[7]-cameraRot[1];
+		A[8] = normalizedPoints2D[2 * pairNumber[i]]*cameraRot[8]-cameraRot[2];
 
 
-					TNT::Array2D<float> TNT_A = TNT::Array2D<float>(4,3,A);
-					TNT::Array1D<float> TNT_B = TNT::Array1D<float>(4,B);
+		A[9] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[6]-cameraRot[3];
+		A[10] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[7]-cameraRot[4];
+		A[11] = normalizedPoints2D[2 * pairNumber[i]+1]*cameraRot[8]-cameraRot[5];
 
-					JAMA::QR<float> JAMA_QR = JAMA::QR<float>(TNT_A);
-					TNT_X = JAMA_QR.solve(TNT_B);
+		B[0] = 0;
+		B[1] = 0;
+		B[2] = -normalizedPoints2D[2 * pairNumber[i]]*cameraTrans[2] + cameraTrans[0];
+		B[3] = -normalizedPoints2D[2 * pairNumber[i]+1]*cameraTrans[2] + cameraTrans[1];
 
-					float p[3];
 
-					if (TNT_X.dim()!=0)
-					{
-						p[0] =  TNT_X[0];
-						p[1] = TNT_X[1];
-						p[2] = TNT_X[2];
-					}
+		TNT::Array2D<float> TNT_A = TNT::Array2D<float>(4,3,A);
+		TNT::Array1D<float> TNT_B = TNT::Array1D<float>(4,B);
 
-					for (int j = 0; j<3; j++)
-						p[j] -=cameraTrans1[j];
-					
-					points3D[3*i] = cameraRot1[0]*p[0] + cameraRot1[3]*p[1] + cameraRot1[6]*p[2];
-					points3D[3*i+1] = cameraRot1[1]*p[0] + cameraRot1[4]*p[1] + cameraRot1[7]*p[2];
-					points3D[3*i+2] = cameraRot1[2]*p[0] + cameraRot1[5]*p[1] + cameraRot1[8]*p[2];
-					
-					printf("Point%d2D = %f\t %f\n",i, points2D[2*i],points2D[2*i+1]);
-					printf("Point%d3D = %f\t %f\t %f\n",i,points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
-				}
+		JAMA::QR<float> JAMA_QR = JAMA::QR<float>(TNT_A);
+		TNT_X = JAMA_QR.solve(TNT_B);
+
+		float p[3];
+
+		if (TNT_X.dim()!=0)
+		{
+			p[0] =  TNT_X[0];
+			p[1] = TNT_X[1];
+			p[2] = TNT_X[2];
+		}
+
+		for (int j = 0; j<3; j++)
+			p[j] -=cameraTrans1[j];
+
+		oldPoints3D[3*i] = points3D[3*i];
+		oldPoints3D[3*i] = points3D[3*i];
+		oldPoints3D[3*i] = points3D[3*i];
+
+		points3D[3*i] = cameraRot1[0]*p[0] + cameraRot1[3]*p[1] + cameraRot1[6]*p[2];
+		points3D[3*i+1] = cameraRot1[1]*p[0] + cameraRot1[4]*p[1] + cameraRot1[7]*p[2];
+		points3D[3*i+2] = cameraRot1[2]*p[0] + cameraRot1[5]*p[1] + cameraRot1[8]*p[2];
+
+		//printf("Point%d2D = %f\t %f\n",i, points2D[2*i],points2D[2*i+1]);
+		printf("%f\t %f\t %f\n",points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
+	}
+	if (energy>THRESHHOLD)
+	{
+		printf("Exists unpaired points, Energy:%f\n.",energy);
+		//return;
+	}
 
 }
 
