@@ -30,9 +30,9 @@ bool g_bMouseTracking_Left = false;
 int g_iMouseLastPos_Left[2] = {0,0};
 float g_fSpin[2]={45.0f,0.0f};
 float g_fZ = -250.0f;
-float marksPosition[3*MARKNUM];
-int g_nWindowWidth = 400;
-int g_nWindowHeight = 400;
+
+int g_nWindowWidth = 640;
+int g_nWindowHeight = 384;
 char infoText[300];
 
 
@@ -46,25 +46,25 @@ void Init()
 {
 	for (int i=0; i<MARKNUM; i++)
 	{
-		marksPosition[i*3] = i*10+20;
-		marksPosition[i*3+1] = i*10-20;
-		marksPosition[i*3+2] = i*10+10;
+		points3D[i*3] = i*10+20;
+		points3D[i*3+1] = i*10-20;
+		points3D[i*3+2] = i*10+10;
 	}
 
 }
 
-void RenderMark(float * markPositionArrays, int markNum)
+void RenderMark(int markNum)
 {
 	glColor4f(1.0f,0.0f,1.0f,0.0f);
 	glPointSize(15);
-	glBegin(GL_POINTS);
+
 	for (int i=0; i<markNum; i++)
 	{
-		//glPushMatrix();
-		//glTranslatef(markPositionArrays[i*3],markPositionArrays[i*3+1],markPositionArrays[i*3+2]);
-		//glutWireSphere(0.1,16,16);
-		//glPopMatrix();
-		glVertex3f(points3D[i*3],points3D[i*3+1],points3D[i*3+2]);
+		glPushMatrix();
+		glTranslatef(points3D[i*3],points3D[i*3+1],points3D[i*3+2]);
+		glutSolidSphere(5,16,16);
+		glPopMatrix();
+		
 	}
 
 	//render two cameras
@@ -233,32 +233,71 @@ array<Byte>^ SocketSendReceive( String^ server, int port )
 
 void Display()
 {
-	glClearColor(0.0,0.0,0.0,0.0);
-	glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT );
-	glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+	IRState* cam1 = new IRState[4];
+	IRState* cam2 = new IRState[4];
 
-	glPushMatrix();
+	WiiReaderWrapper::myReader->GetWiiData(cam1, cam2);
 
-	//Arcball
-	glTranslatef(0.0,0.0,g_fZ);
-	glRotatef( -g_fSpin[1], 1.0f, 0.0f, 0.0f );
-	glRotatef( -g_fSpin[0], 0.0f, 1.0f, 0.0f );
-
-	RenderCoordinates();
-	RenderMark(marksPosition,MARKNUM);
-	glPopMatrix();
-
-	for (int i = 0; i<4; i++)
-		sprintf( infoText, "P[%d]:%.2f,%.2f,%.2f\n",i,points2D[2*i], points3D[2*i+1],points3D[2*i+2]);
-
-	beginRenderText( g_nWindowWidth, g_nWindowHeight );
+	valid2DNum[0]=0;
+	for (int i=0; i<4; i++)
 	{
-		glColor3f( 1.0f, 1.0f, 1.0f );
-		renderText( 5, 15, BITMAP_FONT_TYPE_HELVETICA_12, infoText );
-	}
-	endRenderText();
 
-	glutSwapBuffers();
+		if (cam1[i].found)
+		{
+			points2D[2*valid2DNum[0]] = cam1[i].x;
+			points2D[2*valid2DNum[0]+1] = cam1[i].y;
+			valid2DNum[0]++;
+		}
+	}
+
+	valid2DNum[1]=0;
+	for (int i=0; i<4; i++)
+	{
+
+		if (cam2[i].found)
+		{
+			points2D[2*valid2DNum[1]+8] = cam2[i].x;
+			points2D[2*valid2DNum[1]+9] = cam2[i].y;
+			valid2DNum[1]++;
+		}
+
+	}
+	
+	if (!calibrated && valid2DNum[0] ==4 &&valid2DNum[1] ==4)
+		Calibration();
+
+	if (calibrated)
+	{
+		Reconstruct3D();
+
+		glClearColor(0.0,0.0,0.0,0.0);
+		glClear(GL_COLOR_BUFFER_BIT |GL_DEPTH_BUFFER_BIT );
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+
+		glPushMatrix();
+
+		//Arcball
+		glTranslatef(0.0,0.0,g_fZ);
+		glRotatef( -g_fSpin[1], 1.0f, 0.0f, 0.0f );
+		glRotatef( -g_fSpin[0], 0.0f, 1.0f, 0.0f );
+
+		RenderCoordinates();
+		RenderMark(MARKNUM);
+		glPopMatrix();
+
+		for (int i = 0; i<4; i++)
+			sprintf( infoText, "P[%d]:%.2f,%.2f,%.2f\n",i,points2D[2*i], points3D[2*i+1],points3D[2*i+2]);
+
+		beginRenderText( g_nWindowWidth, g_nWindowHeight );
+		{
+			glColor3f( 1.0f, 1.0f, 1.0f );
+			renderText( 5, 15, BITMAP_FONT_TYPE_HELVETICA_12, infoText );
+		}
+		endRenderText();
+
+		glutSwapBuffers();
+
+	}
 
 }
 
@@ -278,103 +317,47 @@ void parsePacket(IRState* cam, array<Byte>^ packet)
 	}
 }
 
-//void main(int argc, char ** argv)
-//{
-//	glutInit(&argc, argv);
-//	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-//	glutInitWindowSize (g_nWindowWidth, g_nWindowHeight);
-//	glutInitWindowPosition (500, 500);
-//	glutCreateWindow (argv[0]);
-//
-//	Init();
-//
-//	glutDisplayFunc(Display);
-//	glutReshapeFunc(Reshape);
-//	glutKeyboardFunc(Keyboard);
-//	glutMouseFunc(Mouse);
-//	glutMotionFunc(MouseMotion);
-//	glutIdleFunc(Idle);
-//
-//	//SocketSendReceive("127.0.0.1", 6464);
-//	array<Byte>^ bytesReceived = gcnew array<Byte>(64);
-//	IRState* cam1 = new IRState[4];
-//	IRState* cam2 = new IRState[4];
-//
-//	// Create a socket connection with the specified server and port.
-//	Socket^ s = ConnectSocket("127.0.0.1", 6464);
-//	if ( s == nullptr || s->Connected == false)
-//		exit(-1);
-//
-//	int nbytes = 0;
-//
-//
-//	do
-//	{
-//
-//		nbytes = s->Receive(bytesReceived, 64, static_cast<SocketFlags>(0));
-//		if(bytesReceived[0] == 0x01) //camera1
-//		{
-//			parsePacket(cam1, bytesReceived);
-//			valid2DNum[0]=0;
-//			for (int i=0; i<4; i++)
-//			{
-//
-//				if (cam1[i].found)
-//				{
-//					points2D[2*valid2DNum[0]] = cam1[i].x;
-//					points2D[2*valid2DNum[0]+1] = cam1[i].y;
-//					valid2DNum[0]++;
-//				}
-//			}
-//
-//		}
-//		else
-//		{
-//			parsePacket(cam2, bytesReceived);
-//			valid2DNum[1]=0;
-//			for (int i=0; i<4; i++)
-//			{
-//
-//				if (cam2[i].found)
-//				{
-//					points2D[2*valid2DNum[1]+8] = cam2[i].x;
-//					points2D[2*valid2DNum[1]+9] = cam2[i].y;
-//					valid2DNum[1]++;
-//				}
-//
-//			}
-//		}
-//		if (!calibrated && valid2DNum[0] ==4 &&valid2DNum[1] ==4)
-//			Calibration();
-//
-//		if (calibrated)
-//		{
-//			Reconstruct3D();
-//			Display();
-//		}
-//
-//
-//	} while(nbytes > 0 && s->Connected);
-//
-//	glutMainLoop();
-//
-//	exit(0);
-//
-//}
-
 void main(int argc, char ** argv)
 {
+	glutInit(&argc, argv);
+	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+	glutInitWindowSize (g_nWindowWidth, g_nWindowHeight);
+	glutInitWindowPosition (500, 500);
+	glutCreateWindow (argv[0]);
+
+	Init();
 
 	WiiReaderWrapper::myReader = gcnew WiiReader;
 
 	if(!WiiReaderWrapper::myReader->Start())
 		exit(-1);
 
-	IRState* cam1 = new IRState[4];
-	IRState* cam2 = new IRState[4];
-	
-	WiiReaderWrapper::myReader->GetWiiData(cam1, cam2);
+	glutDisplayFunc(Display);
+	glutReshapeFunc(Reshape);
+	glutKeyboardFunc(Keyboard);
+	glutMouseFunc(Mouse);
+	glutMotionFunc(MouseMotion);
+	glutIdleFunc(Idle);
+
+	glutMainLoop();
 	WiiReaderWrapper::myReader->stop();
 	exit(0);
 
 }
+
+//void main(int argc, char ** argv)
+//{
+//
+//	WiiReader^ wr = gcnew WiiReader;
+//
+//	if(!wr->Start())
+//		exit(-1);
+//
+//	IRState* cam1 = new IRState[4];
+//	IRState* cam2 = new IRState[4];
+//	
+//	wr->GetWiiData(cam1, cam2);
+//	wr->stop();
+//	exit(0);
+//
+//}
