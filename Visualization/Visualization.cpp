@@ -33,7 +33,7 @@ float g_fZ = -250.0f;
 
 int g_nWindowWidth = 640;
 int g_nWindowHeight = 384;
-char infoText[300];
+char infoText[4][300];
 
 
 
@@ -285,13 +285,14 @@ void Display()
 		RenderMark(MARKNUM);
 		glPopMatrix();
 
-		for (int i = 0; i<4; i++)
-			sprintf( infoText, "P[%d]:%.2f,%.2f,%.2f\n",i,points2D[2*i], points3D[2*i+1],points3D[2*i+2]);
+		for (int i = 0; i<valid3DNum; i++)
+			sprintf( infoText[i], "P[%d]:%.2f,%.2f,%.2f\n",i,points2D[2*i], points3D[2*i+1],points3D[2*i+2]);
 
 		beginRenderText( g_nWindowWidth, g_nWindowHeight );
 		{
 			glColor3f( 1.0f, 1.0f, 1.0f );
-			renderText( 5, 15, BITMAP_FONT_TYPE_HELVETICA_12, infoText );
+			for (int i = 0; i<valid3DNum; i++)
+			renderText( 5, 36*i+36, BITMAP_FONT_TYPE_TIMES_ROMAN_24 , infoText[i] );
 		}
 		endRenderText();
 
