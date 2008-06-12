@@ -187,3 +187,9 @@ public:
 		}
 	}
 };
+
+ref class WiiReaderWrapper
+{
+public:
+	static WiiReader^ myReader;
+};
