@@ -6,11 +6,14 @@
 #include <cv.h>
 #include "linear/jama_qr.h"
 
-#define THRESHHOLD 20
+#define THRESHHOLD 5
 
 float points2D[16]; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
 //*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
 float points3D[12];
+
+int valid3DNum;  //number of coupled points pair, due to the unsymmetric infomation in two cameras, points invisible in each may be different
+int valid2DNum[2]; //received 2D points in each camera
 
 float oldPoints3D[12]; //to take advantage of time coherence, when the case that more than one points are very close to the epipolar line.
 
@@ -31,7 +34,6 @@ bool useTemporal = false;
 
 bool calibrated = false;
 
-bool
 
 void Calibration()
 {
@@ -394,22 +396,22 @@ void Reconstruct3D()
 
 					float tEnergy = 0;
 					float e;
-					e = normalizedPoints2D[2 * i] * eLine[0] + normalizedPoints2D[2 * i + 1] * eLine[1] + eLine[2];
+					e = (normalizedPoints2D[2 * i] * eLine[0] + normalizedPoints2D[2 * i + 1] * eLine[1] + eLine[2])/sqrt(eLine[0]*eLine[0]+eLine[1]*eLine[1]);
 					tEnergy += abs(e);
-					e = normalizedPoints2D[2 * j] * eLine[3] + normalizedPoints2D[2 * j + 1] * eLine[4] + eLine[5];
+					e = (normalizedPoints2D[2 * j] * eLine[3] + normalizedPoints2D[2 * j + 1] * eLine[4] + eLine[5])/sqrt(eLine[3]*eLine[3]+eLine[4]*eLine[4]);
 					tEnergy += abs(e);
-					e = normalizedPoints2D[2 * k] * eLine[6] + normalizedPoints2D[2 * k + 1] * eLine[7] + eLine[8];
+					e = (normalizedPoints2D[2 * k] * eLine[6] + normalizedPoints2D[2 * k + 1] * eLine[7] + eLine[8])/sqrt(eLine[6]*eLine[6]+eLine[7]*eLine[7]);
 					tEnergy += abs(e);
-					e = normalizedPoints2D[2 * l] * eLine[9] + normalizedPoints2D[2 * l + 1] * eLine[10] + eLine[11];
+					e = (normalizedPoints2D[2 * l] * eLine[9] + normalizedPoints2D[2 * l + 1] * eLine[10] + eLine[11])/sqrt(eLine[9]*eLine[9]+eLine[10]*eLine[10]);
 					tEnergy += abs(e);
 
-					e = normalizedPoints2D[0] * eLine2[(i-4)*3] + normalizedPoints2D[1] * eLine2[(i-4)*3+1] + eLine2[(i-4)*3+2];
+					e = (normalizedPoints2D[0] * eLine2[(i-4)*3] + normalizedPoints2D[1] * eLine2[(i-4)*3+1] + eLine2[(i-4)*3+2])/sqrt(eLine[(i-4)*3]*eLine[(i-4)*3]+eLine[(i-4)*3+1]*eLine[(i-4)*3+1]);
 					tEnergy += abs(e);
-					e = normalizedPoints2D[2] * eLine2[(j-4)*3] + normalizedPoints2D[3] * eLine2[(j-4)*3+1] + eLine2[(j-4)*3+2];
+					e = (normalizedPoints2D[2] * eLine2[(j-4)*3] + normalizedPoints2D[3] * eLine2[(j-4)*3+1] + eLine2[(j-4)*3+2])/sqrt(eLine[(j-4)*3]*eLine[(j-4)*3]+eLine[(j-4)*3+1]*eLine[(j-4)*3+1]);
 					tEnergy += abs(e);
-					e = normalizedPoints2D[4] * eLine2[(k-4)*3] + normalizedPoints2D[5] * eLine2[(k-4)*3+1] + eLine2[(k-4)*3+2];
+					e = (normalizedPoints2D[4] * eLine2[(k-4)*3] + normalizedPoints2D[5] * eLine2[(k-4)*3+1] + eLine2[(k-4)*3+2])/sqrt(eLine[(k-4)*3]*eLine[(k-4)*3]+eLine[(k-4)*3+1]*eLine[(k-4)*3+1]);
 					tEnergy += abs(e);
-					e = normalizedPoints2D[6] * eLine2[(l-4)*3] + normalizedPoints2D[7] * eLine2[(l-4)*3+1] + eLine2[(l-4)*3+2];
+					e = (normalizedPoints2D[6] * eLine2[(l-4)*3] + normalizedPoints2D[7] * eLine2[(l-4)*3+1] + eLine2[(l-4)*3+2])/sqrt(eLine[(l-4)*3]*eLine[(l-4)*3]+eLine[(l-4)*3+1]*eLine[(l-4)*3+1]);
 					tEnergy += abs(e);
 
 					if (tEnergy < energy)
@@ -500,16 +502,16 @@ void Reconstruct3D()
 		printf("Exists unpaired points, Energy:%f\n.",energy);
 		//return;
 	}
-	SpatialCor(points3D);
+	//SpatialCor(points3D);
 	for(int i = 0; i < 4; i++)
 	{
 		printf("%f\t %f\t %f\n",points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
 	}
 }
 
-void SpatialCor(float[] p3d)
-{
-
-}
+//void SpatialCor(float[] p3d)
+//{
+//
+//}
 
 #endif
