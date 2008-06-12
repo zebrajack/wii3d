@@ -375,9 +375,9 @@ void Reconstruct3D()
 		eLine[3 * i + 1] = eMatrix[3] * normalizedPoints2D[2 * i] + eMatrix[4] * normalizedPoints2D[2 * i + 1] + eMatrix[5];
 		eLine[3 * i + 2] = eMatrix[6] * normalizedPoints2D[2 * i] + eMatrix[7] * normalizedPoints2D[2 * i + 1] + eMatrix[8];
 
-		eLine2[3 * i] = eMatrix[0] * normalizedPoints2D[2 * i+8] + eMatrix[1] * normalizedPoints2D[2 * i + 9] + eMatrix[2];
-		eLine2[3 * i + 1] = eMatrix[3] * normalizedPoints2D[2 * i+8] + eMatrix[4] * normalizedPoints2D[2 * i + 9] + eMatrix[5];
-		eLine2[3 * i + 2] = eMatrix[6] * normalizedPoints2D[2 * i+8] + eMatrix[7] * normalizedPoints2D[2 * i + 9] + eMatrix[8];
+		//eLine2[3 * i] = eMatrix[0] * normalizedPoints2D[2 * i+8] + eMatrix[1] * normalizedPoints2D[2 * i + 9] + eMatrix[2];
+		//eLine2[3 * i + 1] = eMatrix[3] * normalizedPoints2D[2 * i+8] + eMatrix[4] * normalizedPoints2D[2 * i + 9] + eMatrix[5];
+		//eLine2[3 * i + 2] = eMatrix[6] * normalizedPoints2D[2 * i+8] + eMatrix[7] * normalizedPoints2D[2 * i + 9] + eMatrix[8];
 	}
 
 	//calculate all pair combination and find the smallest engergy of x2'*E*x1 = 0
@@ -405,14 +405,14 @@ void Reconstruct3D()
 					e = (normalizedPoints2D[2 * l] * eLine[9] + normalizedPoints2D[2 * l + 1] * eLine[10] + eLine[11])/sqrt(eLine[9]*eLine[9]+eLine[10]*eLine[10]);
 					tEnergy += abs(e);
 
-					e = (normalizedPoints2D[0] * eLine2[(i-4)*3] + normalizedPoints2D[1] * eLine2[(i-4)*3+1] + eLine2[(i-4)*3+2])/sqrt(eLine[(i-4)*3]*eLine[(i-4)*3]+eLine[(i-4)*3+1]*eLine[(i-4)*3+1]);
-					tEnergy += abs(e);
-					e = (normalizedPoints2D[2] * eLine2[(j-4)*3] + normalizedPoints2D[3] * eLine2[(j-4)*3+1] + eLine2[(j-4)*3+2])/sqrt(eLine[(j-4)*3]*eLine[(j-4)*3]+eLine[(j-4)*3+1]*eLine[(j-4)*3+1]);
-					tEnergy += abs(e);
-					e = (normalizedPoints2D[4] * eLine2[(k-4)*3] + normalizedPoints2D[5] * eLine2[(k-4)*3+1] + eLine2[(k-4)*3+2])/sqrt(eLine[(k-4)*3]*eLine[(k-4)*3]+eLine[(k-4)*3+1]*eLine[(k-4)*3+1]);
-					tEnergy += abs(e);
-					e = (normalizedPoints2D[6] * eLine2[(l-4)*3] + normalizedPoints2D[7] * eLine2[(l-4)*3+1] + eLine2[(l-4)*3+2])/sqrt(eLine[(l-4)*3]*eLine[(l-4)*3]+eLine[(l-4)*3+1]*eLine[(l-4)*3+1]);
-					tEnergy += abs(e);
+					//e = (normalizedPoints2D[0] * eLine2[(i-4)*3] + normalizedPoints2D[1] * eLine2[(i-4)*3+1] + eLine2[(i-4)*3+2])/sqrt(eLine[(i-4)*3]*eLine[(i-4)*3]+eLine[(i-4)*3+1]*eLine[(i-4)*3+1]);
+					//tEnergy += abs(e);
+					//e = (normalizedPoints2D[2] * eLine2[(j-4)*3] + normalizedPoints2D[3] * eLine2[(j-4)*3+1] + eLine2[(j-4)*3+2])/sqrt(eLine[(j-4)*3]*eLine[(j-4)*3]+eLine[(j-4)*3+1]*eLine[(j-4)*3+1]);
+					//tEnergy += abs(e);
+					//e = (normalizedPoints2D[4] * eLine2[(k-4)*3] + normalizedPoints2D[5] * eLine2[(k-4)*3+1] + eLine2[(k-4)*3+2])/sqrt(eLine[(k-4)*3]*eLine[(k-4)*3]+eLine[(k-4)*3+1]*eLine[(k-4)*3+1]);
+					//tEnergy += abs(e);
+					//e = (normalizedPoints2D[6] * eLine2[(l-4)*3] + normalizedPoints2D[7] * eLine2[(l-4)*3+1] + eLine2[(l-4)*3+2])/sqrt(eLine[(l-4)*3]*eLine[(l-4)*3]+eLine[(l-4)*3+1]*eLine[(l-4)*3+1]);
+					//tEnergy += abs(e);
 
 					if (tEnergy < energy)
 					{
@@ -505,7 +505,7 @@ void Reconstruct3D()
 	//SpatialCor(points3D);
 	for(int i = 0; i < 4; i++)
 	{
-		printf("%f\t %f\t %f\n",points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
+		//printf("%f\t %f\t %f\n",points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
 	}
 }
 
