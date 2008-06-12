@@ -9,7 +9,7 @@
 #include "bitmap_fonts.h"
 #include "reconstruct3D.h"
 #using <System.dll>
-
+#include "WiiReader.h"
 using namespace System;
 using namespace System::Text;
 using namespace System::IO;
@@ -37,12 +37,7 @@ char infoText[300];
 
 
 
-struct IRState {
-	bool found;
-	int x;
-	int y;
-	int size;
-};
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -72,7 +67,7 @@ void RenderMark(float * markPositionArrays, int markNum)
 		//glPopMatrix();
 		glVertex3f(points3D[i*3],points3D[i*3+1],points3D[i*3+2]);
 	}
-	
+
 	//render two cameras
 	glColor4f(1.0f,0.0f,0.0f,0.0f);
 	glVertex3f(0,0,0);
@@ -83,7 +78,7 @@ void RenderMark(float * markPositionArrays, int markNum)
 void RenderCoordinates()
 {
 	glBegin(GL_LINES);
-	
+
 	glColor4f(1.0f,0.0f,0.0f,0.0f);
 	glVertex3f(0.0f,0.0f,0.0f);
 	glVertex3f(50.0f,0.0f,0.0f);
@@ -186,70 +181,56 @@ void MouseMotion(int x,int y)
 
 Socket^ ConnectSocket( String^ server, int port )
 {
-   Socket^ s = nullptr;
-   IPHostEntry^ hostEntry = nullptr;
+	Socket^ s = nullptr;
+	IPHostEntry^ hostEntry = nullptr;
 
-   // Get host related information.
-   hostEntry = Dns::Resolve( server );
+	// Get host related information.
+	hostEntry = Dns::Resolve( server );
 
-   // Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
-   // an exception that occurs when the host IP Address is not compatible with the address family
-   // (typical in the IPv6 case).
-   IEnumerator^ myEnum = hostEntry->AddressList->GetEnumerator();
-   while ( myEnum->MoveNext() )
-   {
-      IPAddress^ address = safe_cast<IPAddress^>(myEnum->Current);
-      IPEndPoint^ endPoint = gcnew IPEndPoint( address,port );
-      Socket^ tmpS = gcnew Socket( endPoint->AddressFamily,SocketType::Stream,ProtocolType::Tcp );
-      tmpS->Connect( endPoint );
-      if ( tmpS->Connected )
-      {
-         s = tmpS;
-         break;
-      }
-      else
-      {
-         continue;
-      }
-   }
-   return s;
+	// Loop through the AddressList to obtain the supported AddressFamily. This is to avoid
+	// an exception that occurs when the host IP Address is not compatible with the address family
+	// (typical in the IPv6 case).
+	IEnumerator^ myEnum = hostEntry->AddressList->GetEnumerator();
+	while ( myEnum->MoveNext() )
+	{
+		IPAddress^ address = safe_cast<IPAddress^>(myEnum->Current);
+		IPEndPoint^ endPoint = gcnew IPEndPoint( address,port );
+		Socket^ tmpS = gcnew Socket( endPoint->AddressFamily,SocketType::Stream,ProtocolType::Tcp );
+		tmpS->Connect( endPoint );
+		if ( tmpS->Connected )
+		{
+			s = tmpS;
+			break;
+		}
+		else
+		{
+			continue;
+		}
+	}
+	return s;
 }
 
 array<Byte>^ SocketSendReceive( String^ server, int port )
 {
-   array<Byte>^ bytesReceived = gcnew array<Byte>(2048);
+	array<Byte>^ bytesReceived = gcnew array<Byte>(2048);
 
-   // Create a socket connection with the specified server and port.
-   Socket^ s = ConnectSocket( server, port );
-   if ( s == nullptr )
-      return nullptr;
+	// Create a socket connection with the specified server and port.
+	Socket^ s = ConnectSocket( server, port );
+	if ( s == nullptr )
+		return nullptr;
 
-   // Receive the server home page content.
-   int nbytes = 0;
-   do
-   {
-      nbytes = s->Receive( bytesReceived, bytesReceived->Length, static_cast<SocketFlags>(0) );
-   }
-   while ( nbytes > 0 );
-
-   return bytesReceived;
-}
-
-void parsePacket(IRState* cam, array<Byte>^ packet)
-{
-	int pos = 2;
-	for(int i = 0; i < 4; i++)
+	// Receive the server home page content.
+	int nbytes = 0;
+	do
 	{
-		cam[i].found = BitConverter::ToBoolean(packet, pos);
-		pos += 1;
-		cam[i].x = BitConverter::ToInt32(packet, pos);
-		pos += 4;
-		cam[i].y = BitConverter::ToInt32(packet, pos);
-		pos += 4;
-		cam[i].size = BitConverter::ToInt32(packet, pos);
-		pos += 4;
+		nbytes = s->Receive( bytesReceived, bytesReceived->Length, static_cast<SocketFlags>(0) );
 	}
+	while ( nbytes > 0 );
+
+	return bytesReceived;
 }
+
+
 
 void Display()
 {
@@ -282,86 +263,119 @@ void Display()
 
 }
 
+void parsePacket(IRState* cam, array<Byte>^ packet)
+{
+	int pos = 2;
+	for(int i = 0; i < 4; i++)
+	{
+		cam[i].found = BitConverter::ToBoolean(packet, pos);
+		pos += 1;
+		cam[i].x = BitConverter::ToInt32(packet, pos);
+		pos += 4;
+		cam[i].y = BitConverter::ToInt32(packet, pos);
+		pos += 4;
+		cam[i].size = BitConverter::ToInt32(packet, pos);
+		pos += 4;
+	}
+}
+
+//void main(int argc, char ** argv)
+//{
+//	glutInit(&argc, argv);
+//	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+//	glutInitWindowSize (g_nWindowWidth, g_nWindowHeight);
+//	glutInitWindowPosition (500, 500);
+//	glutCreateWindow (argv[0]);
+//
+//	Init();
+//
+//	glutDisplayFunc(Display);
+//	glutReshapeFunc(Reshape);
+//	glutKeyboardFunc(Keyboard);
+//	glutMouseFunc(Mouse);
+//	glutMotionFunc(MouseMotion);
+//	glutIdleFunc(Idle);
+//
+//	//SocketSendReceive("127.0.0.1", 6464);
+//	array<Byte>^ bytesReceived = gcnew array<Byte>(64);
+//	IRState* cam1 = new IRState[4];
+//	IRState* cam2 = new IRState[4];
+//
+//	// Create a socket connection with the specified server and port.
+//	Socket^ s = ConnectSocket("127.0.0.1", 6464);
+//	if ( s == nullptr || s->Connected == false)
+//		exit(-1);
+//
+//	int nbytes = 0;
+//
+//
+//	do
+//	{
+//
+//		nbytes = s->Receive(bytesReceived, 64, static_cast<SocketFlags>(0));
+//		if(bytesReceived[0] == 0x01) //camera1
+//		{
+//			parsePacket(cam1, bytesReceived);
+//			valid2DNum[0]=0;
+//			for (int i=0; i<4; i++)
+//			{
+//
+//				if (cam1[i].found)
+//				{
+//					points2D[2*valid2DNum[0]] = cam1[i].x;
+//					points2D[2*valid2DNum[0]+1] = cam1[i].y;
+//					valid2DNum[0]++;
+//				}
+//			}
+//
+//		}
+//		else
+//		{
+//			parsePacket(cam2, bytesReceived);
+//			valid2DNum[1]=0;
+//			for (int i=0; i<4; i++)
+//			{
+//
+//				if (cam2[i].found)
+//				{
+//					points2D[2*valid2DNum[1]+8] = cam2[i].x;
+//					points2D[2*valid2DNum[1]+9] = cam2[i].y;
+//					valid2DNum[1]++;
+//				}
+//
+//			}
+//		}
+//		if (!calibrated && valid2DNum[0] ==4 &&valid2DNum[1] ==4)
+//			Calibration();
+//
+//		if (calibrated)
+//		{
+//			Reconstruct3D();
+//			Display();
+//		}
+//
+//
+//	} while(nbytes > 0 && s->Connected);
+//
+//	glutMainLoop();
+//
+//	exit(0);
+//
+//}
+
 void main(int argc, char ** argv)
 {
-	glutInit(&argc, argv);
-	glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-	glutInitWindowSize (g_nWindowWidth, g_nWindowHeight);
-	glutInitWindowPosition (500, 500);
-	glutCreateWindow (argv[0]);
 
-	Init();
+	WiiReader^ wr = gcnew WiiReader;
 
-	glutDisplayFunc(Display);
-	glutReshapeFunc(Reshape);
-	glutKeyboardFunc(Keyboard);
-	glutMouseFunc(Mouse);
-	glutMotionFunc(MouseMotion);
-	glutIdleFunc(Idle);
-
-	//SocketSendReceive("127.0.0.1", 6464);
-	array<Byte>^ bytesReceived = gcnew array<Byte>(64);
-	IRState* cam1 = new IRState[4];
-	IRState* cam2 = new IRState[4];
-
-	// Create a socket connection with the specified server and port.
-	Socket^ s = ConnectSocket("127.0.0.1", 6464);
-	if ( s == nullptr || s->Connected == false)
+	if(!wr->Start())
 		exit(-1);
 
-	int nbytes = 0;
-
+	IRState* cam1 = new IRState[4];
+	IRState* cam2 = new IRState[4];
 	
-	do
-	{
-
-		nbytes = s->Receive(bytesReceived, 64, static_cast<SocketFlags>(0));
-		if(bytesReceived[0] == 0x01) //camera1
-		{
-			parsePacket(cam1, bytesReceived);
-			valid2DNum[0]=0;
-			for (int i=0; i<4; i++)
-			{
-				
-				if (cam1[i].found)
-				{
-					points2D[2*valid2DNum[0]] = cam1[i].x;
-					points2D[2*valid2DNum[0]+1] = cam1[i].y;
-					valid2DNum[0]++;
-				}
-			}
-
-		}
-		else
-		{
-			parsePacket(cam2, bytesReceived);
-			valid2DNum[1]=0;
-			for (int i=0; i<4; i++)
-			{
-				
-				if (cam2[i].found)
-				{
-					points2D[2*valid2DNum[1]+8] = cam2[i].x;
-					points2D[2*valid2DNum[1]+9] = cam2[i].y;
-					valid2DNum[1]++;
-				}
-				
-			}
-		}
-		if (!calibrated && valid2DNum[0] ==4 &&valid2DNum[1] ==4)
-			Calibration();
-
-		if (calibrated)
-		{
-			Reconstruct3D();
-			Display();
-		}
-
-
-	} while(nbytes > 0 && s->Connected);
-
-	glutMainLoop();
-
+	wr->GetWiiData(cam1, cam2);
+	wr->stop();
 	exit(0);
 
 }
