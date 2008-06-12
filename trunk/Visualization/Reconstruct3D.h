@@ -12,8 +12,8 @@ float points2D[16]; //0~7 is the x and y of 2D points in the first camera [I|0],
 //*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
 float points3D[12];
 
-int valid3DNum;  //number of coupled points pair, due to the unsymmetric infomation in two cameras, points invisible in each may be different
-int valid2DNum[2]; //received 2D points in each camera
+int valid3DNum=0;  //number of coupled points pair, due to the unsymmetric infomation in two cameras, points invisible in each may be different
+int valid2DNum[2]={0,0}; //received 2D points in each camera
 
 float oldPoints3D[12]; //to take advantage of time coherence, when the case that more than one points are very close to the epipolar line.
 
@@ -351,6 +351,8 @@ void Reconstruct3D()
 
 	//Normalized 2D points
 	float normalizedPoints2D[16];
+
+	valid3DNum = min(valid2DNum[0],valid2DNum[1]);
 
 	//Normalization, confirmed
 	for (int i = 0; i < 4; i++)
