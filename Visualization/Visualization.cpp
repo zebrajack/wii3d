@@ -39,7 +39,6 @@ char infoText[300];
 
 
 
-
 //////////////////////////////////////////////////////////////////////////
 void Display();
 
@@ -366,16 +365,16 @@ void parsePacket(IRState* cam, array<Byte>^ packet)
 void main(int argc, char ** argv)
 {
 
-	WiiReader^ wr = gcnew WiiReader;
+	WiiReaderWrapper::myReader = gcnew WiiReader;
 
-	if(!wr->Start())
+	if(!WiiReaderWrapper::myReader->Start())
 		exit(-1);
 
 	IRState* cam1 = new IRState[4];
 	IRState* cam2 = new IRState[4];
 	
-	wr->GetWiiData(cam1, cam2);
-	wr->stop();
+	WiiReaderWrapper::myReader->GetWiiData(cam1, cam2);
+	WiiReaderWrapper::myReader->stop();
 	exit(0);
 
 }
