@@ -70,7 +70,7 @@ void RenderMark(float * markPositionArrays, int markNum)
 		//glTranslatef(markPositionArrays[i*3],markPositionArrays[i*3+1],markPositionArrays[i*3+2]);
 		//glutWireSphere(0.1,16,16);
 		//glPopMatrix();
-		glVertex3f(markPositionArrays[i*3],markPositionArrays[i*3+1],markPositionArrays[i*3+2]);
+		glVertex3f(points3D[i*3],points3D[i*3+1],points3D[i*3+2]);
 	}
 	
 	//render two cameras
@@ -268,7 +268,8 @@ void Display()
 	RenderMark(marksPosition,MARKNUM);
 	glPopMatrix();
 
-	sprintf( infoText, "P2:%.2f,%.2f,%.2f\n", marksPosition[3], marksPosition[4],marksPosition[5]);
+	for (int i = 0; i<4; i++)
+		sprintf( infoText, "P[%d]:%.2f,%.2f,%.2f\n",i,points2D[2*i], points3D[2*i+1],points3D[2*i+2]);
 
 	beginRenderText( g_nWindowWidth, g_nWindowHeight );
 	{
@@ -309,8 +310,7 @@ void main(int argc, char ** argv)
 		exit(-1);
 
 	int nbytes = 0;
-	bool cam1new = false;
-	bool cam2new = false;
+
 	
 	do
 	{
@@ -319,39 +319,42 @@ void main(int argc, char ** argv)
 		if(bytesReceived[0] == 0x01) //camera1
 		{
 			parsePacket(cam1, bytesReceived);
+			valid2DNum[0]=0;
 			for (int i=0; i<4; i++)
 			{
+				
 				if (cam1[i].found)
 				{
-					points2D[2*i] = cam1[i].x;
-					points2D[2*i+1] = cam1[i].y;
+					points2D[2*valid2DNum[0]] = cam1[i].x;
+					points2D[2*valid2DNum[0]+1] = cam1[i].y;
+					valid2DNum[0]++;
 				}
 			}
-			cam1new = true;
 
 		}
 		else
 		{
 			parsePacket(cam2, bytesReceived);
+			valid2DNum[1]=0;
 			for (int i=0; i<4; i++)
 			{
+				
 				if (cam2[i].found)
 				{
-					points2D[2*i+8] = cam2[i].x;
-					points2D[2*i+9] = cam2[i].y;
+					points2D[2*valid2DNum[1]+8] = cam2[i].x;
+					points2D[2*valid2DNum[1]+9] = cam2[i].y;
+					valid2DNum[1]++;
 				}
+				
 			}
-			cam2new = true;
 		}
-		if (!calibrated && cam1new && cam2new)
+		if (!calibrated && valid2DNum[0] ==4 &&valid2DNum[1] ==4)
 			Calibration();
 
-		if (cam1new && cam2new && calibrated)
+		if (calibrated)
 		{
 			Reconstruct3D();
 			Display();
-			cam1new = false;
-			cam2new = false;
 		}
 
 
@@ -362,4 +365,3 @@ void main(int argc, char ** argv)
 	exit(0);
 
 }
-
