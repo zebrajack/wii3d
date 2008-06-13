@@ -29,7 +29,7 @@ using namespace System::Collections;
 bool g_bMouseTracking_Left = false;
 int g_iMouseLastPos_Left[2] = {0,0};
 float g_fSpin[2]={45.0f,0.0f};
-float g_fZ = -250.0f;
+float g_fZ = -200.0f;
 
 int g_nWindowWidth = 640;
 int g_nWindowHeight = 384;
@@ -44,12 +44,7 @@ void Display();
 
 void Init()
 {
-	for (int i=0; i<MARKNUM; i++)
-	{
-		points3D[i*3] = i*10+20;
-		points3D[i*3+1] = i*10-20;
-		points3D[i*3+2] = i*10+10;
-	}
+
 
 }
 
@@ -62,7 +57,7 @@ void RenderMark(int markNum)
 	{
 		glPushMatrix();
 		glTranslatef(points3D[i*3],points3D[i*3+1],points3D[i*3+2]);
-		glutSolidSphere(5,16,16);
+		glutSolidSphere(3,16,16);
 		glPopMatrix();
 		
 	}
@@ -282,11 +277,11 @@ void Display()
 		glRotatef( -g_fSpin[0], 0.0f, 1.0f, 0.0f );
 
 		RenderCoordinates();
-		RenderMark(MARKNUM);
+		RenderMark(valid3DNum);
 		glPopMatrix();
 
 		for (int i = 0; i<valid3DNum; i++)
-			sprintf( infoText[i], "P[%d]:%.2f,%.2f,%.2f\n",i,points2D[2*i], points3D[2*i+1],points3D[2*i+2]);
+			sprintf( infoText[i], "P[%d]:%.2f,%.2f,%.2f\n",i,points3D[3*i], points3D[3*i+1],points3D[3*i+2]);
 
 		beginRenderText( g_nWindowWidth, g_nWindowHeight );
 		{
@@ -346,19 +341,3 @@ void main(int argc, char ** argv)
 
 }
 
-//void main(int argc, char ** argv)
-//{
-//
-//	WiiReader^ wr = gcnew WiiReader;
-//
-//	if(!wr->Start())
-//		exit(-1);
-//
-//	IRState* cam1 = new IRState[4];
-//	IRState* cam2 = new IRState[4];
-//	
-//	wr->GetWiiData(cam1, cam2);
-//	wr->stop();
-//	exit(0);
-//
-//}

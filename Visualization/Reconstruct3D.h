@@ -6,7 +6,7 @@
 #include <cv.h>
 #include "linear/jama_qr.h"
 
-#define THRESHHOLD 5
+#define THRESHHOLD 10
 
 float points2D[16]; //0~7 is the x and y of 2D points in the first camera [I|0], 8~15 is x and y of 2D points in second camera [R|t]
 //*** Important: points2D have to be normalized by multiply K^-1, before 3D reconstruction. ****//
@@ -33,6 +33,10 @@ int pairNumber2[4]; //second possible pair number.
 bool useTemporal = false;
 
 bool calibrated = false;
+
+int pair3[6][3] = {{1,2,3},{2,1,3},{3,1,2},{1,3,2},{2,3,1},{3,2,1}};
+
+int pair2[2][2] = {{1,2},{2,1}};
 
 
 void Calibration()
@@ -354,14 +358,17 @@ void Reconstruct3D()
 
 	valid3DNum = min(valid2DNum[0],valid2DNum[1]);
 
+	if (valid3DNum<1)
+		return;
+
 	//Normalization, confirmed
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < valid2DNum[0]; i++)
 	{
 		normalizedPoints2D[2 * i] = (points2D[2 * i] - K1[2]) / K1[0]; //x
 		normalizedPoints2D[2 * i+1] = (points2D[2 * i+1] - K1[5]) / K1[4]; //y
 	}
 
-	for (int i = 4; i < 8; i++)
+	for (int i = 4; i < 4+valid2DNum[1]; i++)
 	{
 		normalizedPoints2D[2 * i] = (points2D[2 * i] - K2[2]) / K2[0]; //x
 		normalizedPoints2D[2 * i+1] = (points2D[2 * i+1] - K2[5]) / K2[4]; //y
@@ -369,9 +376,10 @@ void Reconstruct3D()
 
 	//epipolar line: E*x
 	float eLine[12]; //4 epipolar lines mapped from 4 2D Points in the first camera to second camera
-	float eLine2[12]; //4 epipolar lines mapped from 4 2D Points in the second camera to first camera
+	float eLine2[12]
+	; //4 epipolar lines mapped from 4 2D Points in the second camera to first camera
 
-	for (int i=0; i < 4; i++)
+	for (int i=0; i < valid2DNum[0]; i++)
 	{
 		eLine[3 * i] = eMatrix[0] * normalizedPoints2D[2 * i] + eMatrix[1] * normalizedPoints2D[2 * i + 1] + eMatrix[2];
 		eLine[3 * i + 1] = eMatrix[3] * normalizedPoints2D[2 * i] + eMatrix[4] * normalizedPoints2D[2 * i + 1] + eMatrix[5];
@@ -383,56 +391,147 @@ void Reconstruct3D()
 	}
 
 	//calculate all pair combination and find the smallest engergy of x2'*E*x1 = 0
-	float energy = 99999.0f;
+	
 
-	for (int i=4; i<8; i++)
+	if (valid2DNum[1] == 1 && valid2DNum[0]>=1)
 	{
-		for (int j = 4; j<8; j++)
+		float energy = 99999.0f;
+		float tEnergy;
+		int optimalPair;
+		for (int i=0;i<valid2DNum[0]; i++)
 		{
-			for (int k = 4; k < 8; k++)
+			 tEnergy= (normalizedPoints2D[8] * eLine[3*i] + normalizedPoints2D[9] * eLine[3*i+1] + eLine[3*i+2])/sqrt(eLine[3*i]*eLine[3*i]+eLine[3*i+1]*eLine[3*i+1]);
+			 if (tEnergy<energy)
+			 {
+				 energy = tEnergy;
+				 optimalPair = i;
+			 }
+		}
+		if (energy>THRESHHOLD)
+		{
+			valid3DNum = 0;
+			return; //no reasonable pair
+		}
+		else
+		{
+			valid3DNum = 1;
+			points2D[0] = points2D[optimalPair*2]; //move the pair to the top of 2D points list
+			points2D[1] = points2D[optimalPair*2+1];
+		}
+
+	}
+
+	if (valid2DNum[1] == 2 && valid2DNum[0]>=2)
+	{
+		float energy = 99999.0f;
+		float tEnergy;
+		int optimalPair[2];
+
+		for (int i=0;i<valid2DNum[0]; i++)
+		{
+			for (int j=0; j<valid2DNum[0]; j++)
 			{
-				for (int l = 4; l < 8; l++)
+				if (i==j)
+					continue;
+				tEnergy= (normalizedPoints2D[8] * eLine[3*i] + normalizedPoints2D[9] * eLine[3*i+1] + eLine[3*i+2])/sqrt(eLine[3*i]*eLine[3*i]+eLine[3*i+1]*eLine[3*i+1]);
+				tEnergy+= (normalizedPoints2D[10] * eLine[3*j] + normalizedPoints2D[11] * eLine[3*j+1] + eLine[3*j+2])/sqrt(eLine[3*j]*eLine[3*j]+eLine[3*j+1]*eLine[3*j+1]);
+				if (tEnergy<energy)
 				{
-					if (i == j || j == k || k == l || i == k || j == l || i == l)
-						continue;
-
-					float tEnergy = 0;
-					float e;
-					e = (normalizedPoints2D[2 * i] * eLine[0] + normalizedPoints2D[2 * i + 1] * eLine[1] + eLine[2])/sqrt(eLine[0]*eLine[0]+eLine[1]*eLine[1]);
-					tEnergy += abs(e);
-					e = (normalizedPoints2D[2 * j] * eLine[3] + normalizedPoints2D[2 * j + 1] * eLine[4] + eLine[5])/sqrt(eLine[3]*eLine[3]+eLine[4]*eLine[4]);
-					tEnergy += abs(e);
-					e = (normalizedPoints2D[2 * k] * eLine[6] + normalizedPoints2D[2 * k + 1] * eLine[7] + eLine[8])/sqrt(eLine[6]*eLine[6]+eLine[7]*eLine[7]);
-					tEnergy += abs(e);
-					e = (normalizedPoints2D[2 * l] * eLine[9] + normalizedPoints2D[2 * l + 1] * eLine[10] + eLine[11])/sqrt(eLine[9]*eLine[9]+eLine[10]*eLine[10]);
-					tEnergy += abs(e);
-
-					//e = (normalizedPoints2D[0] * eLine2[(i-4)*3] + normalizedPoints2D[1] * eLine2[(i-4)*3+1] + eLine2[(i-4)*3+2])/sqrt(eLine[(i-4)*3]*eLine[(i-4)*3]+eLine[(i-4)*3+1]*eLine[(i-4)*3+1]);
-					//tEnergy += abs(e);
-					//e = (normalizedPoints2D[2] * eLine2[(j-4)*3] + normalizedPoints2D[3] * eLine2[(j-4)*3+1] + eLine2[(j-4)*3+2])/sqrt(eLine[(j-4)*3]*eLine[(j-4)*3]+eLine[(j-4)*3+1]*eLine[(j-4)*3+1]);
-					//tEnergy += abs(e);
-					//e = (normalizedPoints2D[4] * eLine2[(k-4)*3] + normalizedPoints2D[5] * eLine2[(k-4)*3+1] + eLine2[(k-4)*3+2])/sqrt(eLine[(k-4)*3]*eLine[(k-4)*3]+eLine[(k-4)*3+1]*eLine[(k-4)*3+1]);
-					//tEnergy += abs(e);
-					//e = (normalizedPoints2D[6] * eLine2[(l-4)*3] + normalizedPoints2D[7] * eLine2[(l-4)*3+1] + eLine2[(l-4)*3+2])/sqrt(eLine[(l-4)*3]*eLine[(l-4)*3]+eLine[(l-4)*3+1]*eLine[(l-4)*3+1]);
-					//tEnergy += abs(e);
-
-					if (tEnergy < energy)
-					{
-						energy = tEnergy;
-						pairNumber[0] = i;
-						pairNumber[1] = j;
-						pairNumber[2] = k;
-						pairNumber[3] = l;
-					}
+					energy = tEnergy;
+					optimalPair[0] = i;
+					optimalPair[1] = j;
 				}
+			}
+		}
+		if (energy>THRESHHOLD)
+		{
+			valid3DNum = 0;
+			return; //no reasonable pair
+		}
+		else
+		{
+			valid3DNum = 2;
+			float p[2];
+
+			if (optimalPair[1]==0)
+			{
+				p[0] = points2D[0];
+				p[1] = points2D[1];
+			}
+			points2D[0] = points2D[optimalPair[0]*2]; //move the pair to the top of 2D points list
+			points2D[1] = points2D[optimalPair[0]*2+1];
+
+			if (optimalPair[1]==0)
+			{
+				points2D[2] = p[0];
+				points2D[3] = p[1];
+			}
+			else
+			{
+				points2D[2] = points2D[optimalPair[1]*2];
+				points2D[3] = points2D[optimalPair[1]*2+1];
 			}
 		}
 	}
 
-	if (energy>THRESHHOLD)
+
+	if (valid2DNum[1]==4 && valid2DNum[0]==4)
 	{
-		return;
+
+		float energy = 99999.0f;
+		for (int i=4; i<8; i++)
+		{
+			for (int j = 4; j<8; j++)
+			{
+				for (int k = 4; k <8; k++)
+				{
+					for (int l = 4; l <8; l++)
+					{
+						if (i == j || j == k || k == l || i == k || j == l || i == l)
+							continue;
+
+						float tEnergy = 0;
+						float e;
+						e = (normalizedPoints2D[2 * i] * eLine[0] + normalizedPoints2D[2 * i + 1] * eLine[1] + eLine[2])/sqrt(eLine[0]*eLine[0]+eLine[1]*eLine[1]);
+						tEnergy += abs(e);
+						e = (normalizedPoints2D[2 * j] * eLine[3] + normalizedPoints2D[2 * j + 1] * eLine[4] + eLine[5])/sqrt(eLine[3]*eLine[3]+eLine[4]*eLine[4]);
+						tEnergy += abs(e);
+						e = (normalizedPoints2D[2 * k] * eLine[6] + normalizedPoints2D[2 * k + 1] * eLine[7] + eLine[8])/sqrt(eLine[6]*eLine[6]+eLine[7]*eLine[7]);
+						tEnergy += abs(e);
+						e = (normalizedPoints2D[2 * l] * eLine[9] + normalizedPoints2D[2 * l + 1] * eLine[10] + eLine[11])/sqrt(eLine[9]*eLine[9]+eLine[10]*eLine[10]);
+						tEnergy += abs(e);
+
+						//e = (normalizedPoints2D[0] * eLine2[(i-4)*3] + normalizedPoints2D[1] * eLine2[(i-4)*3+1] + eLine2[(i-4)*3+2])/sqrt(eLine[(i-4)*3]*eLine[(i-4)*3]+eLine[(i-4)*3+1]*eLine[(i-4)*3+1]);
+						//tEnergy += abs(e);
+						//e = (normalizedPoints2D[2] * eLine2[(j-4)*3] + normalizedPoints2D[3] * eLine2[(j-4)*3+1] + eLine2[(j-4)*3+2])/sqrt(eLine[(j-4)*3]*eLine[(j-4)*3]+eLine[(j-4)*3+1]*eLine[(j-4)*3+1]);
+						//tEnergy += abs(e);
+						//e = (normalizedPoints2D[4] * eLine2[(k-4)*3] + normalizedPoints2D[5] * eLine2[(k-4)*3+1] + eLine2[(k-4)*3+2])/sqrt(eLine[(k-4)*3]*eLine[(k-4)*3]+eLine[(k-4)*3+1]*eLine[(k-4)*3+1]);
+						//tEnergy += abs(e);
+						//e = (normalizedPoints2D[6] * eLine2[(l-4)*3] + normalizedPoints2D[7] * eLine2[(l-4)*3+1] + eLine2[(l-4)*3+2])/sqrt(eLine[(l-4)*3]*eLine[(l-4)*3]+eLine[(l-4)*3+1]*eLine[(l-4)*3+1]);
+						//tEnergy += abs(e);
+
+						if (tEnergy < energy)
+						{
+							energy = tEnergy;
+							pairNumber[0] = i;
+							pairNumber[1] = j;
+							pairNumber[2] = k;
+							pairNumber[3] = l;
+						}
+					}
+				}
+			}
+		}
+
+		if (energy>THRESHHOLD)
+		{
+			valid3DNum = 0;
+			return;
+		}
 	}
+
+
+	//calculate 3D position
 
 	float  A[12];
 
@@ -445,7 +544,7 @@ void Reconstruct3D()
 	//solve the least square solution of x cross* (PX) =0
 	//Reference: Multiple View Geometry in Computer Vision: p312
 
-	for (int i = 0; i<4; i++)
+	for (int i = 0; i<valid3DNum; i++)
 	{
 
 		A[0] = -1;
@@ -489,9 +588,9 @@ void Reconstruct3D()
 		for (int j = 0; j<3; j++)
 			p[j] -=cameraTrans1[j];
 
-		oldPoints3D[3*i] = points3D[3*i];
-		oldPoints3D[3*i] = points3D[3*i];
-		oldPoints3D[3*i] = points3D[3*i];
+		//oldPoints3D[3*i] = points3D[3*i];
+		//oldPoints3D[3*i] = points3D[3*i];
+		//oldPoints3D[3*i] = points3D[3*i];
 
 		points3D[3*i] = cameraRot1[0]*p[0] + cameraRot1[3]*p[1] + cameraRot1[6]*p[2];
 		points3D[3*i+1] = cameraRot1[1]*p[0] + cameraRot1[4]*p[1] + cameraRot1[7]*p[2];
@@ -499,16 +598,8 @@ void Reconstruct3D()
 
 		//printf("Point%d2D = %f\t %f\n",i, points2D[2*i],points2D[2*i+1]);
 	}
-	if (energy>THRESHHOLD)
-	{
-		printf("Exists unpaired points, Energy:%f\n.",energy);
-		//return;
-	}
-	//SpatialCor(points3D);
-	for(int i = 0; i < 4; i++)
-	{
-		//printf("%f\t %f\t %f\n",points3D[3*i],points3D[3*i+1],points3D[3*i+2]);
-	}
+
+
 }
 
 //void SpatialCor(float[] p3d)
